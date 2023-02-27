@@ -1,10 +1,9 @@
 #version 330 core
-out vec4 FragColor;
+out vec4 fragmentColor;
 
-in vec3 TexCoord;
+in vec3 vertexColor;
 
 void main()
 {
-    // linearly interpolate between both textures (80% container, 20% awesomeface)
-    FragColor = vec4(TexCoord, 1.0f);
+    fragmentColor = vec4(vertexColor, 1.0f);
 }

@@ -19,23 +19,81 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 // settings
 constexpr unsigned int SCR_WIDTH = 800;
 constexpr unsigned int SCR_HEIGHT = 600;
-constexpr float rotationSpeed = glm::pi<float>(); // rad per second
 constexpr double cameraSensitivity = 100.0; // pixels per rad
 constexpr float fovDeg = 45.0f;
 constexpr float zNear = 0.1f;
 constexpr float zFar = 100.0f;
 
-float deltaTime = 0.0f; // Time between current frame and last frame
-float lastFrame = 0.0f; // Time of last frame
 std::pair lastCursorPos = {0.0, 0.0};
 bool buttonPressed = false;
 
-Camera camera(3.0);
-glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+Camera camera(5.0);
 glm::mat4 projection = glm::perspective(glm::radians(fovDeg),
                                         static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT), zNear,
                                         zFar);
 
+class DrawData
+{
+public:
+    DrawData(unsigned int vao, const glm::mat4& placement, size_t nVertices)
+        : vao(vao),
+          placement(placement),
+          nVertices(nVertices)
+    {
+    }
+
+    unsigned int vao;
+    glm::mat4 placement;
+    size_t nVertices;
+};
+
+class BufferAllocator final
+{
+public:
+    BufferAllocator() = default;
+    ~BufferAllocator();
+
+    BufferAllocator(const BufferAllocator& other) = delete;
+    BufferAllocator(BufferAllocator&& other) noexcept = delete;
+    BufferAllocator& operator=(const BufferAllocator& other) = delete;
+    BufferAllocator& operator=(BufferAllocator&& other) noexcept = delete;
+
+    unsigned int MakeBuffer();
+    unsigned int MakeVertexArray();
+private:
+    std::vector<unsigned int> buffers;
+    std::vector<unsigned int> arrays;
+};
+
+unsigned int DoWork(const std::vector<float>& vertices, const std::vector<float>& colors, const std::vector<unsigned>& indices, BufferAllocator& bufferAllocator)
+{
+    const unsigned int positionsVBO = bufferAllocator.MakeBuffer();
+    const unsigned int colorsVBO = bufferAllocator.MakeBuffer();
+    const unsigned int ebo = bufferAllocator.MakeBuffer();
+    const unsigned int vao = bufferAllocator.MakeVertexArray();
+
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float/*decltype(vertices)::value_type*/), vertices.data(),
+                 GL_STATIC_DRAW);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, colorsVBO);
+    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float/*decltype(colors)::value_type*/), colors.data(),
+                 GL_STATIC_DRAW);
+    // color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned/*decltype(indices)::value_type*/), indices.data(),
+                 GL_STATIC_DRAW);
+
+    return vao;
+}
 
 int main()
 {
@@ -79,27 +137,29 @@ int main()
     enableDebugOutput();
 #endif
 
-    // configure global opengl state
-    // -----------------------------
-    glEnable(GL_DEPTH_TEST);
-
-    // build and compile our shader program
-    // ------------------------------------
     Shader ourShader("shader.vs", "shader.fs");
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
     const std::vector<float> vertices = {
-        -0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.5f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 0.3f, 0.0f, 0.5f,
-        -0.5f, 0.5f, -0.5f, 0.6f, 0.0f, 0.8f,
-        0.5f, 0.5f, -0.5f, 1.0f, 0.4f, 0.7f,
+        -0.5f, -0.5f, 0.5f,
+        0.5f, -0.5f, 0.5f,
+        -0.5f, 0.5f, 0.5f,
+        0.5f, 0.5f, 0.5f,
+        -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        -0.5f, 0.5f, -0.5f,
+        0.5f, 0.5f, -0.5f,
     };
-    assert(vertices.size() == 8 * (3 + 3));
+    assert(vertices.size() == 8 * 3);
+    std::vector<float> colors = {
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.5f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        0.3f, 0.0f, 0.5f,
+        0.6f, 0.0f, 0.8f,
+        1.0f, 0.4f, 0.7f,
+    };
     const std::vector<unsigned int> indices = {
         0, 1, 3, 0, 3, 2,
         5, 4, 6, 5, 6, 7,
@@ -110,68 +170,51 @@ int main()
     };
     assert(indices.size() == 6 * 2 * 3);
 
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    const std::vector<float> rectVertices = {
+        0.0f, 0.0f, 0.0f,
+        20.0f, 0.0f, 0.0f,
+        20.0f, 20.0f, 0.0f,
+        0.0f, 20.0f, 0.0f,
+    };
+    const std::vector<float> rectColors(8 * 3, 0.5f);
+    const std::vector<unsigned int> rectIndices = {
+        0, 1, 2,
+        0, 2, 3,
+    };
 
-    glBindVertexArray(VAO);
+    BufferAllocator bufferAllocator;
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(decltype(vertices)::value_type), vertices.data(),
-                 GL_STATIC_DRAW);
+    const unsigned cubeVAO = DoWork(vertices, colors, indices, bufferAllocator);
+    const unsigned rectVAO = DoWork(rectVertices, rectColors, rectIndices, bufferAllocator);
 
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    std::vector<DrawData> objectsToDraw = {
+        DrawData(rectVAO, glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -10.0f, 0.0f)), rectIndices.size()),
+        DrawData(cubeVAO, glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.5f)), indices.size()),
+        DrawData(cubeVAO, glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, -1.0f, 0.5f)), indices.size()),
+    };
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(decltype(indices)::value_type), indices.data(),
-                 GL_STATIC_DRAW);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
+    ourShader.use();
 
-    // render loop
-    // -----------
     while (!glfwWindowShouldClose(window))
     {
-        const auto currentFrame = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-        // input
-        // -----
         processInput(window);
 
-        // render
-        // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // activate shader
-        ourShader.use();
-
-        // create transformations
         const glm::mat4 view = camera.GetViewMatrix();
-        ourShader.setMat4("model", model);
-        ourShader.setMat4("view", view);
-        ourShader.setMat4("projection", projection);
+        for (const auto& drawObject : objectsToDraw)
+        {
+            const auto mvpMatrix = projection * view * drawObject.placement;
+            ourShader.setMat4("mvpMatrix", mvpMatrix);
+            glBindVertexArray(drawObject.vao);
+            glDrawElements(GL_TRIANGLES, drawObject.nVertices, GL_UNSIGNED_INT, nullptr);
+        }
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
-
-
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
@@ -186,24 +229,6 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
-    }
-
-    const float rotationAngle = rotationSpeed * deltaTime; // adjust accordingly
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    {
-        model = glm::rotate(model, -rotationAngle, glm::vec3(1.0f, 0.0f, 0.0f));
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    {
-        model = glm::rotate(model, rotationAngle, glm::vec3(1.0f, 0.0f, 0.0f));
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    {
-        model = glm::rotate(model, -rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    {
-        model = glm::rotate(model, rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f));
     }
 }
 
@@ -240,4 +265,35 @@ void mouse_button_callback([[maybe_unused]] GLFWwindow* window, const int button
     {
         buttonPressed = false;
     }
+}
+
+BufferAllocator::~BufferAllocator()
+{
+    for (auto buffer : buffers)
+    {
+        glDeleteBuffers(1, &buffer);
+    }
+
+    for (auto array : arrays)
+    {
+        glDeleteVertexArrays(1, &array);
+    }
+}
+
+unsigned BufferAllocator::MakeBuffer()
+{
+    unsigned int res;
+    glGenBuffers(1, &res);
+    buffers.push_back(res);
+
+    return res;
+}
+
+unsigned BufferAllocator::MakeVertexArray()
+{
+    unsigned int res;
+    glGenVertexArrays(1, &res);
+    arrays.push_back(res);
+
+    return res;
 }

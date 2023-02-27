@@ -30,17 +30,19 @@ target_link_libraries(${EXEC_NAME} assimp glfw
 set_target_properties(${EXEC_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${EXEC_NAME})
 
-add_executable(
-  camera_test
-  camera_test.cpp
-)
-target_link_libraries(
-  camera_test
-  GTest::gtest_main
-)
+if(GRAPHICS_PROBLEMS_BUILD_TESTS)
+	add_executable(
+	  camera_test
+	  camera_test.cpp
+	)
+	target_link_libraries(
+	  camera_test
+	  GTest::gtest_main
+	)
 
-include(GoogleTest)
-gtest_discover_tests(camera_test)
+	include(GoogleTest)
+	gtest_discover_tests(camera_test)
+endif()
 
 add_custom_command(
     TARGET ${EXEC_NAME} POST_BUILD

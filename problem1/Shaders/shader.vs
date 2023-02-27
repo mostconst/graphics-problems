@@ -1,15 +1,13 @@
 #version 330 core
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aTexCoord;
+layout (location = 0) in vec3 localPosition;
+layout (location = 1) in vec3 vertexColorInput;
 
-out vec3 TexCoord;
+out vec3 vertexColor;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 mvpMatrix;
 
 void main()
 {
-	gl_Position = projection * view * model * vec4(aPos, 1.0f);
-	TexCoord = aTexCoord;
+	gl_Position = mvpMatrix * vec4(localPosition, 1.0f);
+	vertexColor = vertexColorInput;
 }
