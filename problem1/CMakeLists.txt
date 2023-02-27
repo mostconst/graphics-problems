@@ -30,11 +30,9 @@ target_link_libraries(${EXEC_NAME} assimp glfw
 set_target_properties(${EXEC_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${EXEC_NAME})
 
-enable_testing()
-
 add_executable(
   camera_test
-  Sources/camera_test.cpp
+  camera_test.cpp
 )
 target_link_libraries(
   camera_test
