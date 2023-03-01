@@ -22,7 +22,7 @@ set(EXEC_NAME problem1)
 
 add_definitions(-DGLFW_INCLUDE_NONE
                 -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")
-add_executable(${EXEC_NAME} ${PROJECT_SOURCES} Sources/camera.cpp ${PROJECT_HEADERS}
+add_executable(${EXEC_NAME} ${PROJECT_SOURCES} Sources/camera.cpp Sources/ArrayBuffer.cpp Sources/VertexArray.cpp Sources/MovableHandle.cpp Sources/math_util.cpp ${PROJECT_HEADERS}
                                ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
                                ${VENDORS_SOURCES})
 target_link_libraries(${EXEC_NAME} assimp glfw

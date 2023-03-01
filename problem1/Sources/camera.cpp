@@ -1,15 +1,17 @@
 ﻿#include "camera.h"
+#include "math_util.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 glm::mat4 Camera::GetViewMatrix()
 {
     const glm::vec3 towards = glm::cross(right, up);
-    const glm::mat4 res(
-        glm::vec4(right[0], up[0], towards[0], 0.0f),
-        glm::vec4(right[1], up[1], towards[1], 0.0f),
-        glm::vec4(right[2], up[2], towards[2], 0.0f),
-        glm::vec4(0.0f, 0.0f, -distance, 1.0f)
+    const auto eye = origin + towards * distance;
+    const glm::mat4 res = rowMajorMatrix(
+        glm::vec4(right, -glm::dot(right, eye)),
+        glm::vec4(up, -glm::dot(up, eye)),
+        glm::vec4(towards, -glm::dot(towards, eye)),
+        glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
     );
     return res;
 }

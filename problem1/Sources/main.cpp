@@ -10,6 +10,8 @@
 #include <learnopengl/gldebug.h>
 
 #include "camera.h"
+#include "ArrayBuffer.h"
+#include "VertexArray.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -27,7 +29,7 @@ constexpr float zFar = 100.0f;
 std::pair lastCursorPos = {0.0, 0.0};
 bool buttonPressed = false;
 
-Camera camera(5.0);
+Camera camera{ 5.0, glm::vec3(-5.0f, -5.0f, 0.0f) };
 glm::mat4 projection = glm::perspective(glm::radians(fovDeg),
                                         static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT), zNear,
                                         zFar);
@@ -35,64 +37,45 @@ glm::mat4 projection = glm::perspective(glm::radians(fovDeg),
 class DrawData
 {
 public:
-    DrawData(unsigned int vao, const glm::mat4& placement, size_t nVertices)
+    DrawData(VertexArray* vao, const glm::mat4& placement, size_t nVertices)
         : vao(vao),
           placement(placement),
           nVertices(nVertices)
     {
     }
 
-    unsigned int vao;
+    VertexArray* vao;
     glm::mat4 placement;
     size_t nVertices;
 };
 
-class BufferAllocator final
+VertexArray LoadBuffers(const std::vector<float>& vertices, const std::vector<float>& colors, const std::vector<unsigned>& indices, std::vector<ArrayBuffer>& arrayBuffers, std::vector<ElementBuffer>& elementBuffers)
 {
-public:
-    BufferAllocator() = default;
-    ~BufferAllocator();
+    ArrayBuffer positionsVBO_;
+    ArrayBuffer colorsVBO_;
+    ElementBuffer ebo_;
+    VertexArray vao_;
 
-    BufferAllocator(const BufferAllocator& other) = delete;
-    BufferAllocator(BufferAllocator&& other) noexcept = delete;
-    BufferAllocator& operator=(const BufferAllocator& other) = delete;
-    BufferAllocator& operator=(BufferAllocator&& other) noexcept = delete;
+    positionsVBO_.bufferData(vertices.size() * sizeof(float/*decltype(vertices)::value_type*/), vertices.data(),
+        GL_STATIC_DRAW);
 
-    unsigned int MakeBuffer();
-    unsigned int MakeVertexArray();
-private:
-    std::vector<unsigned int> buffers;
-    std::vector<unsigned int> arrays;
-};
+    colorsVBO_.bufferData(colors.size() * sizeof(float/*decltype(vertices)::value_type*/), colors.data(),
+        GL_STATIC_DRAW);
 
-unsigned int DoWork(const std::vector<float>& vertices, const std::vector<float>& colors, const std::vector<unsigned>& indices, BufferAllocator& bufferAllocator)
-{
-    const unsigned int positionsVBO = bufferAllocator.MakeBuffer();
-    const unsigned int colorsVBO = bufferAllocator.MakeBuffer();
-    const unsigned int ebo = bufferAllocator.MakeBuffer();
-    const unsigned int vao = bufferAllocator.MakeVertexArray();
+    vao_.vertexAttribPointer(positionsVBO_, 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    vao_.enableVertexAttribArray(0);
 
-    glBindVertexArray(vao);
+    vao_.vertexAttribPointer(colorsVBO_, 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    vao_.enableVertexAttribArray(1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float/*decltype(vertices)::value_type*/), vertices.data(),
-                 GL_STATIC_DRAW);
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(0);
+    ebo_.bufferData(vao_, indices.size() * sizeof(unsigned/*decltype(indices)::value_type*/), indices.data(),
+        GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, colorsVBO);
-    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float/*decltype(colors)::value_type*/), colors.data(),
-                 GL_STATIC_DRAW);
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(1);
+    elementBuffers.push_back(std::move(ebo_));
+    arrayBuffers.push_back(std::move(positionsVBO_));
+    arrayBuffers.push_back(std::move(colorsVBO_));
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned/*decltype(indices)::value_type*/), indices.data(),
-                 GL_STATIC_DRAW);
-
-    return vao;
+    return vao_;
 }
 
 int main()
@@ -182,15 +165,15 @@ int main()
         0, 2, 3,
     };
 
-    BufferAllocator bufferAllocator;
-
-    const unsigned cubeVAO = DoWork(vertices, colors, indices, bufferAllocator);
-    const unsigned rectVAO = DoWork(rectVertices, rectColors, rectIndices, bufferAllocator);
+    std::vector<ArrayBuffer> arrayBuffers;
+    std::vector<ElementBuffer> elementBuffers;
+    VertexArray cubeVAO = LoadBuffers(vertices, colors, indices, arrayBuffers, elementBuffers);
+    VertexArray rectVAO = LoadBuffers(rectVertices, rectColors, rectIndices, arrayBuffers, elementBuffers);
 
     std::vector<DrawData> objectsToDraw = {
-        DrawData(rectVAO, glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -10.0f, 0.0f)), rectIndices.size()),
-        DrawData(cubeVAO, glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.5f)), indices.size()),
-        DrawData(cubeVAO, glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, -1.0f, 0.5f)), indices.size()),
+        DrawData(&rectVAO, glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -10.0f, 0.0f)), rectIndices.size()),
+        DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.5f)), indices.size()),
+        DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, -1.0f, 0.5f)), indices.size()),
     };
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -208,8 +191,7 @@ int main()
         {
             const auto mvpMatrix = projection * view * drawObject.placement;
             ourShader.setMat4("mvpMatrix", mvpMatrix);
-            glBindVertexArray(drawObject.vao);
-            glDrawElements(GL_TRIANGLES, drawObject.nVertices, GL_UNSIGNED_INT, nullptr);
+            drawObject.vao->drawElements(GL_TRIANGLES, drawObject.nVertices, GL_UNSIGNED_INT, nullptr);
         }
 
         glfwSwapBuffers(window);
@@ -265,35 +247,4 @@ void mouse_button_callback([[maybe_unused]] GLFWwindow* window, const int button
     {
         buttonPressed = false;
     }
-}
-
-BufferAllocator::~BufferAllocator()
-{
-    for (auto buffer : buffers)
-    {
-        glDeleteBuffers(1, &buffer);
-    }
-
-    for (auto array : arrays)
-    {
-        glDeleteVertexArrays(1, &array);
-    }
-}
-
-unsigned BufferAllocator::MakeBuffer()
-{
-    unsigned int res;
-    glGenBuffers(1, &res);
-    buffers.push_back(res);
-
-    return res;
-}
-
-unsigned BufferAllocator::MakeVertexArray()
-{
-    unsigned int res;
-    glGenVertexArrays(1, &res);
-    arrays.push_back(res);
-
-    return res;
 }
