@@ -6,9 +6,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include <learnopengl/shader_s.h>
-#include <learnopengl/gldebug.h>
 
+#include "shader_s.h"
+#include "gldebug.h"
 #include "camera.h"
 #include "ArrayBuffer.h"
 #include "VertexArray.h"
@@ -29,7 +29,7 @@ constexpr float zFar = 100.0f;
 std::pair lastCursorPos = {0.0, 0.0};
 bool buttonPressed = false;
 
-Camera camera{ 5.0, glm::vec3(-5.0f, -5.0f, 0.0f) };
+Camera camera{ 5.0, glm::vec3(-1.0f, -1.0f, 0.0f) };
 glm::mat4 projection = glm::perspective(glm::radians(fovDeg),
                                         static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT), zNear,
                                         zFar);
@@ -90,10 +90,6 @@ int main()
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 #endif
 
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
     // glfw window creation
     // --------------------
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", nullptr, nullptr);
@@ -117,10 +113,24 @@ int main()
     }
 
 #ifndef NDEBUG
-    enableDebugOutput();
+    //enableDebugOutput();
 #endif
 
-    Shader ourShader("shader.vs", "shader.fs");
+    ShaderProgram ourShader;
+    try
+    {
+        ourShader = createShader("shader.vs", "shader.fs");
+    }
+    catch (std::ifstream::failure& e)
+    {
+        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << e.what() << std::endl;
+        return -1;
+    }
+    catch (std::invalid_argument& e)
+    {
+        std::cout << e.what() << std::endl;
+        return -1;
+    }
 
     const std::vector<float> vertices = {
         -0.5f, -0.5f, 0.5f,

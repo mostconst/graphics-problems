@@ -37,7 +37,8 @@ include_directories(SYSTEM Glitter/Headers/
                     external/glfw/include/
                     external/glm/
                     external/stb/
-                    external/learnopengl/)
+                    external/learnopengl/
+					utils)
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
 	include(FetchContent)
@@ -52,4 +53,5 @@ endif()
 
 enable_testing()
 
+add_subdirectory(utils)
 add_subdirectory(problem1)
