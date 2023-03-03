@@ -18,12 +18,12 @@ public:
                              GLenum type,
                              GLboolean normalized,
                              GLsizei stride,
-                             const void* pointer);
+                             GLsizei offset);
     void enableVertexAttribArray(GLuint index);
     void drawElements(GLenum mode,
                       GLsizei count,
                       GLenum type,
-                      const void* indices);
+                      const void* indices) const;
     void Bind() const { glBindVertexArray(handle.GetRaw()); }
 
     unsigned int GetRaw() const { return handle.GetRaw(); }
@@ -31,5 +31,3 @@ public:
 private:
     MovableHandle handle;
 };
-
-void loadElementBuffer(const VertexArray& vertexArray, const ElementBuffer& elementBuffer, GLsizeiptr size, const void* data, GLenum usage);

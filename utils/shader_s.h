@@ -8,22 +8,19 @@
 #include <sstream>
 #include <iostream>
 
+#include "ShaderProgramGuard.h"
+
 class ShaderProgram
 {
 public:
     ShaderProgram() = default;
     ShaderProgram(const std::string& vertexCode, const std::string& fragmentCode);
-    ~ShaderProgram();
-    ShaderProgram(const ShaderProgram& other) = delete;
-    ShaderProgram(ShaderProgram&& other) noexcept;
-    ShaderProgram& operator=(const ShaderProgram& other) = delete;
-    ShaderProgram& operator=(ShaderProgram&& other) noexcept;
 
     void use() const;
     void setMat4(const std::string& name, const glm::mat4& mat) const;
 
 private:
-    unsigned int id = 0;
+    ShaderProgramGuard guard;
 };
 
 ShaderProgram createShader(const char* vertexPath, const char* fragmentPath);

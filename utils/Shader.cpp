@@ -22,7 +22,7 @@ void Shader::Compile(const std::string& code) const
     glGetShaderiv(id, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        const int bufferSize = 1024;
+        constexpr int bufferSize = 1024;
         GLchar infoLog[bufferSize];
         glGetShaderInfoLog(id, bufferSize, nullptr, infoLog);
         throw std::invalid_argument(infoLog);

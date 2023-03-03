@@ -17,30 +17,22 @@ VertexArray::~VertexArray()
     glDeleteVertexArrays(1, &handle.GetRaw());
 }
 
-void VertexArray::vertexAttribPointer(const ArrayBuffer& arrayBuffer, GLuint index, GLint size, GLenum type,
-                                      GLboolean normalized, GLsizei stride, const void* pointer)
+void VertexArray::vertexAttribPointer(const ArrayBuffer& arrayBuffer, const GLuint index, const GLint size, const GLenum type,
+                                      const GLboolean normalized, const GLsizei stride, GLsizei offset)
 {
     glBindVertexArray(handle.GetRaw());
     arrayBuffer.Bind();
-    glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+    glVertexAttribPointer(index, size, type, normalized, stride, reinterpret_cast<const void*>(offset));  // NOLINT(performance-no-int-to-ptr)
 }
 
-void VertexArray::enableVertexAttribArray(GLuint index)
+void VertexArray::enableVertexAttribArray(const GLuint index)
 {
     glBindVertexArray(handle.GetRaw());
     glEnableVertexAttribArray(index);
 }
 
-void VertexArray::drawElements(GLenum mode, GLsizei count, GLenum type, const void* indices)
+void VertexArray::drawElements(const GLenum mode, const GLsizei count, const GLenum type, const void* indices) const
 {
     glBindVertexArray(handle.GetRaw());
     glDrawElements(mode, count, type, indices);
-}
-
-void loadElementBuffer(const VertexArray& vertexArray, const ElementBuffer& elementBuffer, GLsizeiptr size,
-                       const void* data, GLenum usage)
-{
-    vertexArray.Bind();
-    elementBuffer.Bind();
-
 }

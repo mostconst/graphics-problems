@@ -51,29 +51,29 @@ public:
 
 VertexArray LoadBuffers(const std::vector<float>& vertices, const std::vector<float>& colors, const std::vector<unsigned>& indices, std::vector<ArrayBuffer>& arrayBuffers, std::vector<ElementBuffer>& elementBuffers)
 {
-    ArrayBuffer positionsVBO_;
-    ArrayBuffer colorsVBO_;
-    ElementBuffer ebo_;
+    ArrayBuffer positionsVBO;
+    ArrayBuffer colorsVBO;
+    ElementBuffer ebo;
     VertexArray vao_;
 
-    positionsVBO_.bufferData(vertices.size() * sizeof(float/*decltype(vertices)::value_type*/), vertices.data(),
+    positionsVBO.bufferData(vertices.size() * sizeof(float), vertices.data(),
         GL_STATIC_DRAW);
 
-    colorsVBO_.bufferData(colors.size() * sizeof(float/*decltype(vertices)::value_type*/), colors.data(),
+    colorsVBO.bufferData(colors.size() * sizeof(float), colors.data(),
         GL_STATIC_DRAW);
 
-    vao_.vertexAttribPointer(positionsVBO_, 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    vao_.vertexAttribPointer(positionsVBO, 0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     vao_.enableVertexAttribArray(0);
 
-    vao_.vertexAttribPointer(colorsVBO_, 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    vao_.vertexAttribPointer(colorsVBO, 1, 3, GL_FLOAT, GL_FALSE, 0, 0);
     vao_.enableVertexAttribArray(1);
 
-    ebo_.bufferData(vao_, indices.size() * sizeof(unsigned/*decltype(indices)::value_type*/), indices.data(),
+    ebo.bufferData(vao_, indices.size() * sizeof(unsigned/*decltype(indices)::value_type*/), indices.data(),
         GL_STATIC_DRAW);
 
-    elementBuffers.push_back(std::move(ebo_));
-    arrayBuffers.push_back(std::move(positionsVBO_));
-    arrayBuffers.push_back(std::move(colorsVBO_));
+    elementBuffers.push_back(std::move(ebo));
+    arrayBuffers.push_back(std::move(positionsVBO));
+    arrayBuffers.push_back(std::move(colorsVBO));
 
     return vao_;
 }
@@ -113,7 +113,7 @@ int main()
     }
 
 #ifndef NDEBUG
-    //enableDebugOutput();
+    enableDebugOutput();
 #endif
 
     ShaderProgram ourShader;
@@ -123,7 +123,7 @@ int main()
     }
     catch (std::ifstream::failure& e)
     {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << e.what() << std::endl;
+        std::cout << "Failed to read shader file: " << e.what() << std::endl;
         return -1;
     }
     catch (std::invalid_argument& e)

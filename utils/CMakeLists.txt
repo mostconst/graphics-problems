@@ -8,4 +8,5 @@ utils
 "math_util.cpp"
 "shader_s.cpp"
 "Shader.cpp"
+"ShaderProgramGuard.cpp"
 )
