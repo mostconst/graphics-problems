@@ -1,6 +1,10 @@
 file(GLOB VENDORS_SOURCES ../external/glad/src/glad.c)
 file(GLOB PROJECT_HEADERS Headers/*.hpp)
-file(GLOB PROJECT_SOURCES Sources/*.cpp)
+file(GLOB PROJECT_SOURCES
+Sources/main.cpp
+Sources/GeometryObject.cpp
+Sources/UserContext.cpp
+)
 file(GLOB PROJECT_SHADERS Shaders/*.comp
                           Shaders/*.frag
                           Shaders/*.geom

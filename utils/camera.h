@@ -11,7 +11,7 @@ public:
     {
     }
 
-    glm::mat4 GetViewMatrix();
+    glm::mat4 GetViewMatrix() const;
     void RotateHorizontal(const float angle);
     void RotateVertical(const float angle);
 
