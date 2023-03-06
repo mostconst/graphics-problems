@@ -7,7 +7,7 @@ glm::mat4 Camera::GetViewMatrix() const
 {
     const glm::vec3 towards = glm::cross(right, up);
     const auto eye = origin + towards * distance;
-    const glm::mat4 res = rowMajorMatrix(
+    const glm::mat4 res = math_utils::rowMajorMatrix(
         glm::vec4(right, -glm::dot(right, eye)),
         glm::vec4(up, -glm::dot(up, eye)),
         glm::vec4(towards, -glm::dot(towards, eye)),

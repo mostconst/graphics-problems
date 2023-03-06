@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "ArrayBuffer.h"
+#include "helper_enums.h"
 #include "glad/glad.h"
 
 class VertexArray final
@@ -15,13 +16,13 @@ public:
     void vertexAttribPointer(const ArrayBuffer& arrayBuffer,
                              GLuint index,
                              GLint size,
-                             GLenum type,
+                             const AttribType type,
                              GLboolean normalized,
                              GLsizei stride,
                              GLsizei offset);
     void enableVertexAttribArray(GLuint index);
     void drawElements(GLenum mode,
-                      GLsizei count,
+                      size_t count,
                       GLenum type,
                       const void* indices) const;
     void Bind() const { glBindVertexArray(handle.GetRaw()); }

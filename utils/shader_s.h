@@ -1,15 +1,12 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 
 #include "ShaderProgramGuard.h"
 
+// HW_ITEM 1
 class ShaderProgram
 {
 public:

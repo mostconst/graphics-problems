@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <vector>
 
@@ -23,24 +24,32 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 VertexArray LoadBuffers(const GeometryObject& object, std::vector<ArrayBuffer>& arrayBuffers,
                         std::vector<ElementBuffer>& elementBuffers)
 {
+    const auto& colors = object.GetColors();
+    const auto& vertices = object.GetVertices();
+    const auto& indices = object.GetIndices();
+    using ColorType = std::remove_reference_t<decltype(colors)>::value_type;
+    using VertexType = std::remove_reference_t<decltype(vertices)>::value_type;
+    using IndexType= std::remove_reference_t<decltype(indices)>::value_type;
+
     ArrayBuffer positionsVBO;
-    ArrayBuffer colorsVBO;
-    ElementBuffer ebo;
-    VertexArray vao_;
-
-    positionsVBO.bufferData(object.GetVertices().size() * sizeof(float), object.GetVertices().data(),
+    positionsVBO.bufferData(vertices.size() * sizeof(VertexType), vertices.data(),
                             GL_STATIC_DRAW);
-
-    colorsVBO.bufferData(object.GetColors().size() * sizeof(float), object.GetColors().data(),
+    ArrayBuffer colorsVBO;
+    colorsVBO.bufferData(colors.size() * sizeof(ColorType), colors.data(),
                          GL_STATIC_DRAW);
 
-    vao_.vertexAttribPointer(positionsVBO, 0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    vao_.enableVertexAttribArray(0);
+    // HW_ITEM 7
+    constexpr int positionIndex = 0;
+    VertexArray vao;
+    vao.vertexAttribPointer(positionsVBO, positionIndex, VertexType::nComponents, VertexType::componentType, GL_FALSE, 0, 0);
+    vao.enableVertexAttribArray(positionIndex);
 
-    vao_.vertexAttribPointer(colorsVBO, 1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    vao_.enableVertexAttribArray(1);
+    constexpr int colorIndex = 1;
+    vao.vertexAttribPointer(colorsVBO, colorIndex, ColorType::nComponents, ColorType::componentType, GL_FALSE, 0, 0);
+    vao.enableVertexAttribArray(colorIndex);
 
-    ebo.bufferData(vao_, object.GetIndices().size() * sizeof(unsigned/*decltype(indices)::value_type*/),
+    ElementBuffer ebo;
+    ebo.bufferData(vao, indices.size() * sizeof(IndexType),
                    object.GetIndices().data(),
                    GL_STATIC_DRAW);
 
@@ -48,13 +57,11 @@ VertexArray LoadBuffers(const GeometryObject& object, std::vector<ArrayBuffer>& 
     arrayBuffers.push_back(std::move(positionsVBO));
     arrayBuffers.push_back(std::move(colorsVBO));
 
-    return vao_;
+    return vao;
 }
 
 int main()
 {
-    // glfw: initialize and configure
-    // ------------------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -63,11 +70,15 @@ int main()
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 #endif
 
-    UserContext userContext;
+    constexpr glm::vec3 firstCubeLocation(1.0f, 1.0f, 0.5f);
+    constexpr glm::vec3 secondCubeLocation(-1.0f, -1.0f, 0.5f);
+    constexpr float platformSize = 5.0f;
+    constexpr glm::vec3 lookAt(-1.0f, -1.0f, 0.0f);
+    // HW_ITEM 3
+    UserContext userContext(lookAt, 5.5f);
 
-    // glfw window creation
-    // --------------------
-    GLFWwindow* window = glfwCreateWindow(userContext.GetScreenWidth(), userContext.GetScreenHeight(), "Problem 1", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(userContext.GetScreenWidth(), userContext.GetScreenHeight(), "Problem 1",
+                                          nullptr, nullptr);
     if (window == nullptr)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -80,8 +91,6 @@ int main()
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetWindowUserPointer(window, &userContext);
 
-    // glad: load all OpenGL function pointers
-    // ---------------------------------------
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -109,20 +118,22 @@ int main()
     }
 
     const GeometryObject cube = makeRainbowCube();
-    const GeometryObject platform = makePlatform();
+    const GeometryObject platform = makePlatform(platformSize);
 
     std::vector<ArrayBuffer> arrayBuffers;
     std::vector<ElementBuffer> elementBuffers;
     VertexArray cubeVAO = LoadBuffers(cube, arrayBuffers, elementBuffers);
     VertexArray rectVAO = LoadBuffers(platform, arrayBuffers, elementBuffers);
 
+    // HW_ITEM 6
     const std::vector<DrawData> objectsToDraw = {
-        DrawData(&rectVAO, glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, -10.0f, 0.0f)),
+        DrawData(&rectVAO, glm::mat4(1.0f),
                  platform.GetIndices().size()),
-        DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.5f)), cube.GetIndices().size()),
-        DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, -1.0f, 0.5f)), cube.GetIndices().size()),
+        DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), firstCubeLocation), cube.GetIndices().size()),
+        DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), secondCubeLocation), cube.GetIndices().size()),
     };
 
+    // HW_ITEM 9
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     ourShader.use();
@@ -137,6 +148,7 @@ int main()
         for (const auto& drawObject : objectsToDraw)
         {
             const auto mvpMatrix = userContext.GetProjection() * view * drawObject.placement;
+            // HW_ITEM 5
             ourShader.setMat4("mvpMatrix", mvpMatrix);
             drawObject.vao->drawElements(GL_TRIANGLES, drawObject.nVertices, GL_UNSIGNED_INT, nullptr);
         }
@@ -145,14 +157,10 @@ int main()
         glfwPollEvents();
     }
 
-    // glfw: terminate, clearing all previously allocated GLFW resources.
-    // ------------------------------------------------------------------
     glfwTerminate();
     return EXIT_SUCCESS;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -161,13 +169,9 @@ void processInput(GLFWwindow* window)
     }
 }
 
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
 {
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
-    auto* context =  static_cast<UserContext*>(glfwGetWindowUserPointer(window));
+    auto* context = static_cast<UserContext*>(glfwGetWindowUserPointer(window));
     context->OnWindowSizeChange(width, height);
 }
 

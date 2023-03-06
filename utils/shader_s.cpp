@@ -1,5 +1,8 @@
 ﻿#include "shader_s.h"
 
+#include <fstream>
+#include <sstream>
+
 #include "Shader.h"
 
 ShaderProgram createShader(const char* vertexPath, const char* fragmentPath)

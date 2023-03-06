@@ -2,6 +2,7 @@
 #include <utility>
 
 #include "camera.h"
+#include "math_util.h"
 #include "UserContext.h"
 #include "glm/fwd.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
@@ -9,6 +10,8 @@
 class UserContext
 {
 public:
+    UserContext(glm::vec3 lookAt, float cameraDistance);
+
     int GetScreenWidth() const
     {
         return screenWidth;
@@ -55,8 +58,8 @@ private:
     std::pair<double, double> lastCursorPos = { 0.0, 0.0 };
     bool buttonPressed = false;
 
-    Camera camera{ 5.0, glm::vec3(-1.0f, -1.0f, 0.0f) };
-    glm::mat4 projection = glm::perspective(glm::radians(fovDeg),
+    Camera camera;
+    glm::mat4 projection = math_utils::perspectiveFov(glm::radians(fovDeg),
         static_cast<float>(screenWidth) / static_cast<float>(screenHeight), zNear,
         zFar);
 };
