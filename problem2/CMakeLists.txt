@@ -20,7 +20,7 @@ source_group("Sources" FILES ${PROJECT_SOURCES})
 source_group("Vendors" FILES ${VENDORS_SOURCES})
 source_group("Textures" FILES ${PROJECT_TEXTURES})
 
-set(EXEC_NAME problem1)
+set(EXEC_NAME problem2)
 
 add_definitions(-DGLFW_INCLUDE_NONE
                 -DPROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\")

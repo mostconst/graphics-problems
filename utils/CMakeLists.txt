@@ -11,6 +11,8 @@ utils
 "ShaderProgramGuard.cpp"
 "Color.cpp"
 "Vertex.h"
+"GeometryObject.cpp"
+"UserContext.cpp"
 )
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)

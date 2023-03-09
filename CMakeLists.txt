@@ -55,3 +55,4 @@ enable_testing()
 
 add_subdirectory(utils)
 add_subdirectory(problem1)
+add_subdirectory(problem2)
