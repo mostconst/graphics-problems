@@ -52,3 +52,7 @@ void ShaderProgram::setMat4(const std::string& name, const glm::mat4& mat) const
     glUniformMatrix4fv(glGetUniformLocation(guard.GetRaw(), name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
+void ShaderProgram::SetFloat(const std::string& name, float value)
+{
+    glUniform1f(glGetUniformLocation(guard.GetRaw(), name.c_str()), value);
+}

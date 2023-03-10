@@ -22,6 +22,12 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double screenX, double screenY);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
+utils::Vertex norm(const utils::Vertex& v)
+{
+    auto length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+    return { v.x / length, v.y / length, v.z / length };
+}
+
 VertexArray LoadBuffers(const GeometryObject& object, std::vector<ArrayBuffer>& arrayBuffers,
     std::vector<ElementBuffer>& elementBuffers)
 {
@@ -39,15 +45,28 @@ VertexArray LoadBuffers(const GeometryObject& object, std::vector<ArrayBuffer>& 
     colorsVBO.bufferData(colors.size() * sizeof(ColorType), colors.data(),
         GL_STATIC_DRAW);
 
+    std::vector<utils::Vertex> norm_vertices;
+    for (auto v : vertices)
+    {
+        norm_vertices.push_back(norm(v));
+    }
+    ArrayBuffer positions2VBO;
+    positions2VBO.bufferData(norm_vertices.size() * sizeof(VertexType), norm_vertices.data(),
+        GL_STATIC_DRAW);
+
     // HW_ITEM 7
-    constexpr int positionIndex = 0;
     VertexArray vao;
+    constexpr int positionIndex = 0;
     vao.vertexAttribPointer(positionsVBO, positionIndex, VertexType::nComponents, VertexType::componentType, GL_FALSE, 0, 0);
     vao.enableVertexAttribArray(positionIndex);
 
     constexpr int colorIndex = 1;
     vao.vertexAttribPointer(colorsVBO, colorIndex, ColorType::nComponents, ColorType::componentType, GL_FALSE, 0, 0);
     vao.enableVertexAttribArray(colorIndex);
+
+    constexpr int positionIndex2 = 2;
+    vao.vertexAttribPointer(positions2VBO, positionIndex2, VertexType::nComponents, VertexType::componentType, GL_FALSE, 0, 0);
+    vao.enableVertexAttribArray(positionIndex2);
 
     ElementBuffer ebo;
     ebo.bufferData(vao, indices.size() * sizeof(IndexType),
@@ -56,6 +75,7 @@ VertexArray LoadBuffers(const GeometryObject& object, std::vector<ArrayBuffer>& 
 
     elementBuffers.push_back(std::move(ebo));
     arrayBuffers.push_back(std::move(positionsVBO));
+    arrayBuffers.push_back(std::move(positions2VBO));
     arrayBuffers.push_back(std::move(colorsVBO));
 
     return vao;
@@ -66,12 +86,6 @@ using VertInd = std::pair<std::vector<utils::Vertex>, std::vector<unsigned int>>
 utils::Vertex middle(const utils::Vertex& v1, const utils::Vertex& v2)
 {
     return { (v1.x + v2.x) / 2.0f, (v1.y + v2.y) / 2.0f, (v1.z + v2.z) / 2.0f };
-}
-
-utils::Vertex norm(const utils::Vertex& v)
-{
-    auto length = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-    return { v.x / length, v.y / length, v.z / length };
 }
 
 VertInd tesselate(const std::vector<utils::Vertex>& vertices, const std::vector<unsigned int>& indices)
@@ -133,8 +147,8 @@ GeometryObject makePyramid()
 
     auto tessResult = tesselate(_vertices, _indices);
     tessResult = tesselate(tessResult.first, tessResult.second);
-    //tessResult = tesselate(tessResult.first, tessResult.second);
-    //tessResult = tesselate(tessResult.first, tessResult.second);
+    tessResult = tesselate(tessResult.first, tessResult.second);
+    tessResult = tesselate(tessResult.first, tessResult.second);
     auto vertices = tessResult.first;
     auto indices = tessResult.second;
 
@@ -147,13 +161,7 @@ GeometryObject makePyramid()
         colors.emplace_back(dist6(rng));
     }
 
-    std::vector<utils::Vertex> norm_vertices;
-    for(auto v: vertices)
-    {
-        norm_vertices.push_back(norm(v));
-    }
-
-    return { std::move(norm_vertices), std::move(colors), std::move(indices) };
+    return { std::move(vertices), std::move(colors), std::move(indices) };
 }
 
 int main()
@@ -210,15 +218,15 @@ int main()
         return EXIT_FAILURE;
     }
 
-    const GeometryObject cube = makePyramid();
+    const GeometryObject pyramid = makePyramid();
 
     std::vector<ArrayBuffer> arrayBuffers;
     std::vector<ElementBuffer> elementBuffers;
-    VertexArray cubeVAO = LoadBuffers(cube, arrayBuffers, elementBuffers);
+    VertexArray cubeVAO = LoadBuffers(pyramid, arrayBuffers, elementBuffers);
 
     // HW_ITEM 6
     const std::vector<DrawData> objectsToDraw = {
-        DrawData(&cubeVAO, glm::mat4(1.0f), cube.GetIndices().size()),
+        DrawData(&cubeVAO, glm::mat4(1.0f), pyramid.GetIndices().size()),
     };
 
     // HW_ITEM 9
@@ -226,12 +234,15 @@ int main()
     glEnable(GL_DEPTH_TEST);
     ourShader.use();
 
+    glfwSetTime(0.0);
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        float coeff = -glm::cos(glfwGetTime()) / 2.0f + 0.5f;
+        ourShader.SetFloat("coeff", coeff);
         const glm::mat4 view = userContext.GetViewMatrix();
         for (const auto& drawObject : objectsToDraw)
         {
