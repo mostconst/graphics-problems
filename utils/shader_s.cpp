@@ -42,17 +42,21 @@ ShaderProgram::ShaderProgram(const std::string& vertexCode, const std::string& f
     }
 }
 
-void ShaderProgram::use() const
+void ShaderProgram::Use() const
 {
     glUseProgram(guard.GetRaw());
 }
 
-void ShaderProgram::setMat4(const std::string& name, const glm::mat4& mat) const
+void ShaderProgram::SetMat4(const std::string& name, const glm::mat4& mat) const
 {
-    glUniformMatrix4fv(glGetUniformLocation(guard.GetRaw(), name.c_str()), 1, GL_FALSE, &mat[0][0]);
+    const GLint location = glGetUniformLocation(guard.GetRaw(), name.c_str());
+    assert(location != -1);
+    glUniformMatrix4fv(location, 1, GL_FALSE, &mat[0][0]);
 }
 
-void ShaderProgram::SetFloat(const std::string& name, float value)
+void ShaderProgram::SetFloat(const std::string& name, float value) const
 {
-    glUniform1f(glGetUniformLocation(guard.GetRaw(), name.c_str()), value);
+    const GLint location = glGetUniformLocation(guard.GetRaw(), name.c_str());
+    assert(location != -1);
+    glUniform1f(location, value);
 }

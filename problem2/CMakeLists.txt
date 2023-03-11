@@ -2,6 +2,8 @@ file(GLOB VENDORS_SOURCES ../external/glad/src/glad.c)
 file(GLOB PROJECT_HEADERS Headers/*.hpp)
 file(GLOB PROJECT_SOURCES
 Sources/main.cpp
+Sources/tesselate.cpp
+Sources/helper.cpp
 )
 file(GLOB PROJECT_SHADERS Shaders/*.comp
                           Shaders/*.frag

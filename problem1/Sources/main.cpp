@@ -136,7 +136,7 @@ int main()
     // HW_ITEM 9
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
-    ourShader.use();
+    ourShader.Use();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -149,7 +149,7 @@ int main()
         {
             const auto mvpMatrix = userContext.GetProjection() * view * drawObject.placement;
             // HW_ITEM 5
-            ourShader.setMat4("mvpMatrix", mvpMatrix);
+            ourShader.SetMat4("mvpMatrix", mvpMatrix);
             drawObject.vao->drawElements(GL_TRIANGLES, drawObject.nVertices, GL_UNSIGNED_INT, nullptr);
         }
 

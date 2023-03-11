@@ -13,9 +13,9 @@ public:
     ShaderProgram() = default;
     ShaderProgram(const std::string& vertexCode, const std::string& fragmentCode);
 
-    void use() const;
-    void setMat4(const std::string& name, const glm::mat4& mat) const;
-    void SetFloat(const std::string& name, float value);
+    void Use() const;
+    void SetMat4(const std::string& name, const glm::mat4& mat) const;
+    void SetFloat(const std::string& name, float value) const;
 
 private:
     ShaderProgramGuard guard;

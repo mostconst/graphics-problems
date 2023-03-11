@@ -15,6 +15,8 @@
 #include "VertexArray.h"
 #include "DrawData.h"
 #include "GeometryObject.h"
+#include "helper.h"
+#include "tesselate.h"
 #include "UserContext.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -28,141 +30,13 @@ utils::Vertex norm(const utils::Vertex& v)
     return { v.x / length, v.y / length, v.z / length };
 }
 
-VertexArray LoadBuffers(const GeometryObject& object, std::vector<ArrayBuffer>& arrayBuffers,
-    std::vector<ElementBuffer>& elementBuffers)
+struct Problem2Parameters
 {
-    const auto& colors = object.GetColors();
-    const auto& vertices = object.GetVertices();
-    const auto& indices = object.GetIndices();
-    using ColorType = std::remove_reference_t<decltype(colors)>::value_type;
-    using VertexType = std::remove_reference_t<decltype(vertices)>::value_type;
-    using IndexType = std::remove_reference_t<decltype(indices)>::value_type;
-
-    ArrayBuffer positionsVBO;
-    positionsVBO.bufferData(vertices.size() * sizeof(VertexType), vertices.data(),
-        GL_STATIC_DRAW);
-    ArrayBuffer colorsVBO;
-    colorsVBO.bufferData(colors.size() * sizeof(ColorType), colors.data(),
-        GL_STATIC_DRAW);
-
-    std::vector<utils::Vertex> norm_vertices;
-    for (auto v : vertices)
-    {
-        norm_vertices.push_back(norm(v));
-    }
-    ArrayBuffer positions2VBO;
-    positions2VBO.bufferData(norm_vertices.size() * sizeof(VertexType), norm_vertices.data(),
-        GL_STATIC_DRAW);
-
-    // HW_ITEM 7
-    VertexArray vao;
-    constexpr int positionIndex = 0;
-    vao.vertexAttribPointer(positionsVBO, positionIndex, VertexType::nComponents, VertexType::componentType, GL_FALSE, 0, 0);
-    vao.enableVertexAttribArray(positionIndex);
-
-    constexpr int colorIndex = 1;
-    vao.vertexAttribPointer(colorsVBO, colorIndex, ColorType::nComponents, ColorType::componentType, GL_FALSE, 0, 0);
-    vao.enableVertexAttribArray(colorIndex);
-
-    constexpr int positionIndex2 = 2;
-    vao.vertexAttribPointer(positions2VBO, positionIndex2, VertexType::nComponents, VertexType::componentType, GL_FALSE, 0, 0);
-    vao.enableVertexAttribArray(positionIndex2);
-
-    ElementBuffer ebo;
-    ebo.bufferData(vao, indices.size() * sizeof(IndexType),
-        object.GetIndices().data(),
-        GL_STATIC_DRAW);
-
-    elementBuffers.push_back(std::move(ebo));
-    arrayBuffers.push_back(std::move(positionsVBO));
-    arrayBuffers.push_back(std::move(positions2VBO));
-    arrayBuffers.push_back(std::move(colorsVBO));
-
-    return vao;
-}
-
-using VertInd = std::pair<std::vector<utils::Vertex>, std::vector<unsigned int>>;
-
-utils::Vertex middle(const utils::Vertex& v1, const utils::Vertex& v2)
-{
-    return { (v1.x + v2.x) / 2.0f, (v1.y + v2.y) / 2.0f, (v1.z + v2.z) / 2.0f };
-}
-
-VertInd tesselate(const std::vector<utils::Vertex>& vertices, const std::vector<unsigned int>& indices)
-{
-    auto out_vertices = vertices;
-    auto out_indices = indices;
-    for(size_t i = 0; i < indices.size(); i+=3)
-    {
-        const auto ind0 = indices[i];
-        const auto ind1 = indices[i + 1];
-        const auto ind2 = indices[i + 2];
-        const auto ind3 = out_vertices.size() + 0;
-        const auto ind4 = out_vertices.size() + 1;
-        const auto ind5 = out_vertices.size() + 2;
-        out_vertices.push_back(middle(vertices[ind0], vertices[ind1]));
-        out_vertices.push_back(middle(vertices[ind1], vertices[ind2]));
-        out_vertices.push_back(middle(vertices[ind2], vertices[ind0]));
-
-        out_indices.push_back(ind0);
-        out_indices.push_back(ind3);
-        out_indices.push_back(ind5);
-
-        out_indices.push_back(ind3);
-        out_indices.push_back(ind1);
-        out_indices.push_back(ind4);
-
-        out_indices.push_back(ind5);
-        out_indices.push_back(ind4);
-        out_indices.push_back(ind2);
-
-        out_indices.push_back(ind3);
-        out_indices.push_back(ind4);
-        out_indices.push_back(ind5);
-    }
-
-    return { out_vertices, out_indices };
-}
-
-GeometryObject makePyramid()
-{
-    std::vector<utils::Vertex> _vertices = {
-        {1.0f, 0.0f, 0.0f},
-        {0.0f, 1.0f, 0.0f},
-        {-1.0f, 0.0f, 0.0f},
-        {0.0f, -1.0f, 0.0f},
-        {0.0f, 0.0f, 1.0f},
-        {0.0f, 0.0f, -1.0f},
-    };
-    std::vector<unsigned int> _indices = {
-        0, 1, 4,
-        1, 2, 4,
-        2, 3, 4,
-        3, 0, 4,
-        0, 1, 5,
-        1, 2, 5,
-        2, 3, 5,
-        3, 0, 5,
-    };
-
-    auto tessResult = tesselate(_vertices, _indices);
-    tessResult = tesselate(tessResult.first, tessResult.second);
-    tessResult = tesselate(tessResult.first, tessResult.second);
-    tessResult = tesselate(tessResult.first, tessResult.second);
-    auto vertices = tessResult.first;
-    auto indices = tessResult.second;
-
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> dist6(0, 0xFFFFFF);
-    std::vector<utils::Color> colors;
-    for (size_t i = 0; i != vertices.size(); ++i)
-    {
-        colors.emplace_back(dist6(rng));
-    }
-
-    return { std::move(vertices), std::move(colors), std::move(indices) };
-}
+    static constexpr int tesselationLevel = 1;
+    static_assert(tesselationLevel >= 0);
+    static constexpr int morphTime = 1;
+    static_assert(morphTime > 0);
+};
 
 int main()
 {
@@ -175,7 +49,6 @@ int main()
 #endif
 
     constexpr glm::vec3 lookAt(0.0f, 0.0f, 0.0f);
-    // HW_ITEM 3
     UserContext userContext(lookAt, 5.5f);
 
     GLFWwindow* window = glfwCreateWindow(userContext.GetScreenWidth(), userContext.GetScreenHeight(), "Problem 1",
@@ -218,21 +91,24 @@ int main()
         return EXIT_FAILURE;
     }
 
-    const GeometryObject pyramid = makePyramid();
+    const GeometryObject pyramid = makePyramid(Problem2Parameters::tesselationLevel);
+    const auto& pyramidVertices = pyramid.GetVertices();
+    std::vector<utils::Vertex> morphedVertices;
+    morphedVertices.reserve(pyramidVertices.size());
+    std::transform(pyramidVertices.cbegin(), pyramidVertices.cend(), std::back_inserter(morphedVertices), norm);
 
     std::vector<ArrayBuffer> arrayBuffers;
     std::vector<ElementBuffer> elementBuffers;
-    VertexArray cubeVAO = LoadBuffers(pyramid, arrayBuffers, elementBuffers);
 
-    // HW_ITEM 6
+    VertexArray cubeVAO = LoadBuffers(pyramid, morphedVertices, arrayBuffers, elementBuffers);
+
     const std::vector<DrawData> objectsToDraw = {
         DrawData(&cubeVAO, glm::mat4(1.0f), pyramid.GetIndices().size()),
     };
 
-    // HW_ITEM 9
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
-    ourShader.use();
+    ourShader.Use();
 
     glfwSetTime(0.0);
     while (!glfwWindowShouldClose(window))
@@ -241,14 +117,13 @@ int main()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        float coeff = -glm::cos(glfwGetTime()) / 2.0f + 0.5f;
-        ourShader.SetFloat("coeff", coeff);
-        const glm::mat4 view = userContext.GetViewMatrix();
+        float morphCoefficient = -glm::cos(glfwGetTime() * glm::pi<double>() / Problem2Parameters::morphTime) / 2.0f + 0.5f;
+        ourShader.SetFloat("morphCoeff", morphCoefficient);
+        const glm::mat4 viewMatrix = userContext.GetViewMatrix();
         for (const auto& drawObject : objectsToDraw)
         {
-            const auto mvpMatrix = userContext.GetProjection() * view * drawObject.placement;
-            // HW_ITEM 5
-            ourShader.setMat4("mvpMatrix", mvpMatrix);
+            const auto mvpMatrix = userContext.GetProjection() * viewMatrix * drawObject.placement;
+            ourShader.SetMat4("mvpMatrix", mvpMatrix);
             drawObject.vao->drawElements(GL_TRIANGLES, drawObject.nVertices, GL_UNSIGNED_INT, nullptr);
         }
 
