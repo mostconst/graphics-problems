@@ -34,6 +34,21 @@ target_link_libraries(${EXEC_NAME} assimp glfw
 set_target_properties(${EXEC_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${EXEC_NAME})
 
+if(GRAPHICS_PROBLEMS_BUILD_TESTS)
+	add_executable(
+	  tesselate_test
+	  Sources/tesselate_test.cpp
+	)
+	target_link_libraries(
+	  tesselate_test
+	  utils
+	  GTest::gtest_main
+	)
+
+	include(GoogleTest)
+	gtest_discover_tests(tesselate_test)
+endif()
+
 add_custom_command(
     TARGET ${EXEC_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/${EXEC_NAME}/Shaders $<TARGET_FILE_DIR:${EXEC_NAME}>
