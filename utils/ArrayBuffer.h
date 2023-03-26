@@ -10,7 +10,7 @@ public:
     ArrayBuffer();
     ~ArrayBuffer();
     unsigned GetRaw() const { return handle.GetRaw(); }
-    void bufferData(GLsizeiptr size,
+    void bufferData(size_t size,
                     const void* data,
                     GLenum usage) const;
     ArrayBuffer(const ArrayBuffer& other) = delete;
@@ -35,9 +35,9 @@ public:
     ElementBuffer& operator=(ElementBuffer&& other) noexcept = default;
 
     unsigned int GetRaw() { return handle.GetRaw(); }
-    void bufferData(const VertexArray&, GLsizeiptr size,
-        const void* data,
-        GLenum usage) const;
+    void bufferData(const VertexArray&, size_t size,
+                    const void* data,
+                    GLenum usage) const;
 
     void Bind() const;
 

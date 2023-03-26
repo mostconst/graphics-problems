@@ -4,7 +4,7 @@
 class MovableHandle
 {
 public:
-    MovableHandle(const unsigned int handle);
+    MovableHandle(unsigned int handle);
     ~MovableHandle() = default;
     const unsigned int& GetRaw() const;
     MovableHandle(const MovableHandle& other) = delete;

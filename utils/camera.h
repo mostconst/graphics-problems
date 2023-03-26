@@ -12,8 +12,8 @@ public:
     }
 
     glm::mat4 GetViewMatrix() const;
-    void RotateHorizontal(const float angle);
-    void RotateVertical(const float angle);
+    void RotateHorizontal(float angle);
+    void RotateVertical(float angle);
 
 private:
     const float distance;

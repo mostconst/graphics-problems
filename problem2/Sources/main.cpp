@@ -16,7 +16,6 @@
 #include "DrawData.h"
 #include "GeometryObject.h"
 #include "helper.h"
-#include "tesselate.h"
 #include "UserContext.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -26,7 +25,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 utils::Vertex norm(const utils::Vertex& v)
 {
-    auto length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+	const auto length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
     return { v.x / length, v.y / length, v.z / length };
 }
 
@@ -117,7 +116,8 @@ int main()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        float morphCoefficient = -glm::cos(glfwGetTime() * glm::pi<double>() / Problem2Parameters::morphTime) / 2.0f + 0.5f;
+        double morphCoefficientDouble = -glm::cos(glfwGetTime() * glm::pi<double>() / Problem2Parameters::morphTime) / 2.0 + 0.5;
+        auto morphCoefficient = static_cast<float>(morphCoefficientDouble);
         ourShader.SetFloat("morphCoeff", morphCoefficient);
         const glm::mat4 viewMatrix = userContext.GetViewMatrix();
         for (const auto& drawObject : objectsToDraw)

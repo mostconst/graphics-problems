@@ -2,7 +2,14 @@
 #include "GeometryObject.h"
 #include "glm/vec3.hpp"
 
-using VertInd = std::pair<std::vector<glm::vec3>, std::vector<unsigned int>>;
+struct IndexTriangle
+{
+    // TODO cleanup
+    const size_t first;
+    const size_t second;
+    const size_t third;
+};
 
-GeometryObject makePyramid(int tesselationLevel);
-VertInd tesselateIter(const VertInd& input, int tesselationLevel);
+using VertInd = std::pair<std::vector<glm::vec3>, std::vector<IndexTriangle>>;
+
+VertInd tesselateIter(int tesselationLevel);
