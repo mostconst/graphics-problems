@@ -13,6 +13,7 @@ utils
 "Vertex.h"
 "GeometryObject.cpp"
 "UserContext.cpp"
+"convertion.h"
 )
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)

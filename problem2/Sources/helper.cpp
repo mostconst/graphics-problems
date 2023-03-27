@@ -86,7 +86,7 @@ GeometryObject makePyramid(const int tesselationLevel)
         verticesRes.emplace_back(v.x, v.y, v.z);
     }
 
-    std::vector<size_t> indicesRes;
+    std::vector<unsigned int> indicesRes;
     indicesRes.reserve(triangles.size() * 3);
     for (const auto& triangle : triangles)
     {

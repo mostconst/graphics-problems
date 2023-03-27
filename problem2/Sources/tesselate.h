@@ -5,9 +5,9 @@
 struct IndexTriangle
 {
     // TODO cleanup
-    const size_t first;
-    const size_t second;
-    const size_t third;
+    const unsigned int first;
+    const unsigned int second;
+    const unsigned int third;
 };
 
 using VertInd = std::pair<std::vector<glm::vec3>, std::vector<IndexTriangle>>;
