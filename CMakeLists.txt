@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(Glitter)
+project(graphics-problems)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -8,17 +8,6 @@ option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 add_subdirectory(external/glfw)
-
-option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-option(ASSIMP_BUILD_SAMPLES OFF)
-option(ASSIMP_BUILD_TESTS OFF)
-add_subdirectory(external/assimp)
-
-option(BUILD_BULLET2_DEMOS OFF)
-option(BUILD_CPU_DEMOS OFF)
-option(BUILD_EXTRAS OFF)
-option(BUILD_OPENGL3_DEMOS OFF)
-option(BUILD_UNIT_TESTS OFF)
 
 option(GRAPHICS_PROBLEMS_BUILD_TESTS OFF)
 
@@ -41,14 +30,9 @@ include_directories(SYSTEM Glitter/Headers/
 					utils)
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
-	include(FetchContent)
-	FetchContent_Declare(
-	  googletest
-	  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-	)
+    add_subdirectory(external/googletest)
 	# For Windows: Prevent overriding the parent project's compiler/linker settings
 	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-	FetchContent_MakeAvailable(googletest)
 endif()
 
 enable_testing()

@@ -14,3 +14,6 @@
 	path = external/glad
 	url = https://github.com/Dav1dde/glad
 	branch = c
+[submodule "external/googletest"]
+	path = external/googletest
+	url = https://github.com/google/googletest

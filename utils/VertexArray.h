@@ -19,7 +19,7 @@ public:
                              const AttribType type,
                              GLboolean normalized,
                              GLsizei stride,
-                             GLsizei offset);
+                             size_t offset);
     void enableVertexAttribArray(GLuint index);
     void drawElements(GLenum mode,
                       size_t count,

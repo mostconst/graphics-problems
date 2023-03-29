@@ -18,10 +18,11 @@ VertexArray::~VertexArray()
 }
 
 void VertexArray::vertexAttribPointer(const ArrayBuffer& arrayBuffer, const GLuint index, const GLint size, const AttribType type,
-                                      const GLboolean normalized, const GLsizei stride, GLsizei offset)
+                                      const GLboolean normalized, const GLsizei stride, size_t offset)
 {
     glBindVertexArray(handle.GetRaw());
     arrayBuffer.Bind();
+	// TODO check size
     glVertexAttribPointer(index, size, static_cast<GLenum>(type), normalized, stride, reinterpret_cast<const void*>(offset));  // NOLINT(performance-no-int-to-ptr)
 }
 

@@ -29,7 +29,7 @@ add_definitions(-DGLFW_INCLUDE_NONE
 add_executable(${EXEC_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS}
                                ${PROJECT_SHADERS} ${PROJECT_CONFIGS}
                                ${VENDORS_SOURCES})
-target_link_libraries(${EXEC_NAME} assimp glfw
+target_link_libraries(${EXEC_NAME} glfw
                       ${GLFW_LIBRARIES} ${GLAD_LIBRARIES} utils)
 set_target_properties(${EXEC_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${EXEC_NAME})
