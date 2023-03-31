@@ -5,9 +5,12 @@
 
 #include "GeometryObject.h"
 #include "tesselate.h"
+#include "IndexTriangle.h"
 
-VertexArray LoadBuffers(const GeometryObject& object, const std::vector<utils::Vertex>& morphedVertices, std::vector<ArrayBuffer>& arrayBuffers,
-                        std::vector<ElementBuffer>& elementBuffers)
+namespace nsk_cg
+{
+VertexArray LoadBuffers(const GeometryObject& object, const std::vector<Vertex>& morphedVertices, std::vector<ArrayBuffer>& arrayBuffers,
+    std::vector<ElementBuffer>& elementBuffers)
 {
     assert(object.GetVertices().size() == morphedVertices.size());
 
@@ -20,17 +23,17 @@ VertexArray LoadBuffers(const GeometryObject& object, const std::vector<utils::V
 
     ArrayBuffer positionsVBO;
     positionsVBO.bufferData(vertices.size() * sizeof(VertexType), vertices.data(),
-                            GL_STATIC_DRAW);
+        GL_STATIC_DRAW);
     ArrayBuffer colorsVBO;
     colorsVBO.bufferData(colors.size() * sizeof(ColorType), colors.data(),
-                         GL_STATIC_DRAW);
+        GL_STATIC_DRAW);
 
     ArrayBuffer positions2VBO;
     positions2VBO.bufferData(morphedVertices.size() * sizeof(VertexType), morphedVertices.data(),
-                             GL_STATIC_DRAW);
+        GL_STATIC_DRAW);
 
     // HW_ITEM 7
-    VertexArray vao;
+    nsk_cg::VertexArray vao;
     constexpr int positionIndex = 0;
     vao.vertexAttribPointer(positionsVBO, positionIndex, VertexType::nComponents, VertexType::componentType, GL_FALSE, 0, 0);
     vao.enableVertexAttribArray(positionIndex);
@@ -45,8 +48,8 @@ VertexArray LoadBuffers(const GeometryObject& object, const std::vector<utils::V
 
     ElementBuffer ebo;
     ebo.bufferData(vao, indices.size() * sizeof(IndexType),
-                   object.GetIndices().data(),
-                   GL_STATIC_DRAW);
+        object.GetIndices().data(),
+        GL_STATIC_DRAW);
 
     elementBuffers.push_back(std::move(ebo));
     arrayBuffers.push_back(std::move(positionsVBO));
@@ -56,12 +59,12 @@ VertexArray LoadBuffers(const GeometryObject& object, const std::vector<utils::V
     return vao;
 }
 
-std::vector<utils::Color> generateColors(size_t nColors)
+std::vector<utils::Color> generateColors(const size_t nColors)
 {
     std::random_device dev;
     std::mt19937 rng(dev());
     std::vector<utils::Color> colors;
-    std::uniform_int_distribution<std::mt19937::result_type> dist6(0, 0xFFFFFF);
+    const std::uniform_int_distribution<std::mt19937::result_type> dist6(0, 0xFFFFFF);
     for (size_t i = 0; i != nColors; ++i)
     {
         colors.emplace_back(dist6(rng));
@@ -74,12 +77,12 @@ GeometryObject makePyramid(const int tesselationLevel)
 {
     assert(tesselationLevel >= 0);
 
-    auto tessResult = tesselateIter(tesselationLevel);
+    const auto tessResult = tesselateIterative(tesselationLevel);
 
-    auto vertices = tessResult.first;
-    auto triangles = tessResult.second;
+    const auto vertices = tessResult.first;
+    const auto triangles = tessResult.second;
 
-    std::vector<utils::Vertex> verticesRes;
+    std::vector<Vertex> verticesRes;
     verticesRes.reserve(vertices.size());
     for (const auto& v : vertices)
     {
@@ -90,12 +93,13 @@ GeometryObject makePyramid(const int tesselationLevel)
     indicesRes.reserve(triangles.size() * 3);
     for (const auto& triangle : triangles)
     {
-        indicesRes.push_back(triangle.first);
-        indicesRes.push_back(triangle.second);
-        indicesRes.push_back(triangle.third);
+        indicesRes.push_back(triangle.First());
+        indicesRes.push_back(triangle.Second());
+        indicesRes.push_back(triangle.Third());
     }
 
     std::vector<utils::Color> colors = generateColors(vertices.size());
 
     return { std::move(verticesRes), std::move(colors), std::move(indicesRes) };
+}
 }

@@ -2,12 +2,44 @@
 
 #include "glad/glad.h"
 
-UserContext::UserContext(glm::vec3 lookAt, float cameraDistance)
+namespace nsk_cg
+{
+UserContext::UserContext(const glm::vec3& lookAt, const float cameraDistance)
     : camera{ cameraDistance, lookAt }
 {
 }
 
-void UserContext::OnWindowSizeChange(int width, int height)
+int UserContext::GetScreenWidth() const
+{
+    return screenWidth;
+}
+
+int UserContext::GetScreenHeight() const
+{
+    return screenHeight;
+}
+
+double UserContext::GetCameraSensitivity() const
+{
+    return cameraSensitivity;
+}
+
+const Camera& UserContext::GetCamera() const
+{
+    return camera;
+}
+
+const glm::mat4& UserContext::GetProjection() const
+{
+    return projection;
+}
+
+glm::mat4 UserContext::GetViewMatrix() const
+{
+    return camera.GetViewMatrix();
+}
+
+void UserContext::OnWindowSizeChange(const int width, const int height)
 {
     glViewport(0, 0, width, height);
     projection = math_utils::perspectiveFov(glm::radians(fovDeg),
@@ -25,7 +57,8 @@ void UserContext::OnMouseMove(double screenX, double screenY)
     lastCursorPos = { screenX, screenY };
 }
 
-void UserContext::OnLeftMouseButtonAction(bool pressed)
+void UserContext::OnLeftMouseButtonAction(const bool pressed)
 {
     buttonPressed = pressed;
+}
 }

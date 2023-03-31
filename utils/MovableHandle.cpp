@@ -1,5 +1,7 @@
 ﻿#include "MovableHandle.h"
 
+namespace nsk_cg
+{
 MovableHandle::MovableHandle(const unsigned handle)
     : handle(handle)
 {
@@ -25,4 +27,5 @@ MovableHandle& MovableHandle::operator=(MovableHandle&& other) noexcept
     }
 
     return *this;
+}
 }

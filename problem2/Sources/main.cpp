@@ -9,7 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "shader_s.h"
+#include "ShaderProgram.h"
 #include "gldebug.h"
 #include "ArrayBuffer.h"
 #include "VertexArray.h"
@@ -23,7 +23,8 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double screenX, double screenY);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
-utils::Vertex norm(const utils::Vertex& v)
+
+nsk_cg::Vertex norm(const nsk_cg::Vertex& v)
 {
 	const auto length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
     return { v.x / length, v.y / length, v.z / length };
@@ -31,7 +32,7 @@ utils::Vertex norm(const utils::Vertex& v)
 
 struct Problem2Parameters
 {
-    static constexpr int tesselationLevel = 1;
+    static constexpr int tesselationLevel = 5;
     static_assert(tesselationLevel >= 0);
     static constexpr int morphTime = 1;
     static_assert(morphTime > 0);
@@ -48,7 +49,7 @@ int main()
 #endif
 
     constexpr glm::vec3 lookAt(0.0f, 0.0f, 0.0f);
-    UserContext userContext(lookAt, 5.5f);
+    nsk_cg::UserContext userContext(lookAt, 5.5f);
 
     GLFWwindow* window = glfwCreateWindow(userContext.GetScreenWidth(), userContext.GetScreenHeight(), "Problem 1",
         nullptr, nullptr);
@@ -71,13 +72,13 @@ int main()
     }
 
 #ifndef NDEBUG
-    enableDebugOutput();
+    nsk_cg::enableDebugOutput();
 #endif
 
-    ShaderProgram ourShader;
+    nsk_cg::ShaderProgram ourShader;
     try
     {
-        ourShader = createShader("shader.vs", "shader.fs");
+        ourShader = nsk_cg::createShader("shader.vs", "shader.fs");
     }
     catch (std::ifstream::failure& e)
     {
@@ -90,19 +91,19 @@ int main()
         return EXIT_FAILURE;
     }
 
-    const GeometryObject pyramid = makePyramid(Problem2Parameters::tesselationLevel);
+    const nsk_cg::GeometryObject pyramid = nsk_cg::makePyramid(Problem2Parameters::tesselationLevel);
     const auto& pyramidVertices = pyramid.GetVertices();
-    std::vector<utils::Vertex> morphedVertices;
+    std::vector<nsk_cg::Vertex> morphedVertices;
     morphedVertices.reserve(pyramidVertices.size());
     std::transform(pyramidVertices.cbegin(), pyramidVertices.cend(), std::back_inserter(morphedVertices), norm);
 
-    std::vector<ArrayBuffer> arrayBuffers;
-    std::vector<ElementBuffer> elementBuffers;
+    std::vector<nsk_cg::ArrayBuffer> arrayBuffers;
+    std::vector<nsk_cg::ElementBuffer> elementBuffers;
 
-    VertexArray cubeVAO = LoadBuffers(pyramid, morphedVertices, arrayBuffers, elementBuffers);
+    nsk_cg::VertexArray cubeVAO = LoadBuffers(pyramid, morphedVertices, arrayBuffers, elementBuffers);
 
-    const std::vector<DrawData> objectsToDraw = {
-        DrawData(&cubeVAO, glm::mat4(1.0f), pyramid.GetIndices().size()),
+    const std::vector<nsk_cg::DrawData> objectsToDraw = {
+        nsk_cg::DrawData(&cubeVAO, glm::mat4(1.0f), pyramid.GetIndices().size()),
     };
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -118,7 +119,7 @@ int main()
 
         double morphCoefficientDouble = -glm::cos(glfwGetTime() * glm::pi<double>() / Problem2Parameters::morphTime) / 2.0 + 0.5;
         auto morphCoefficient = static_cast<float>(morphCoefficientDouble);
-        ourShader.SetFloat("morphCoeff", morphCoefficient);
+        ourShader.SetFloat("morphCoefficient", morphCoefficient);
         const glm::mat4 viewMatrix = userContext.GetViewMatrix();
         for (const auto& drawObject : objectsToDraw)
         {
@@ -145,19 +146,19 @@ void processInput(GLFWwindow* window)
 
 void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
 {
-    auto* context = static_cast<UserContext*>(glfwGetWindowUserPointer(window));
+    auto* context = static_cast<nsk_cg::UserContext*>(glfwGetWindowUserPointer(window));
     context->OnWindowSizeChange(width, height);
 }
 
 void mouse_callback(GLFWwindow* window, const double screenX, const double screenY)
 {
-    auto* context = static_cast<UserContext*>(glfwGetWindowUserPointer(window));
+    auto* context = static_cast<nsk_cg::UserContext*>(glfwGetWindowUserPointer(window));
     context->OnMouseMove(screenX, screenY);
 }
 
 void mouse_button_callback(GLFWwindow* window, const int button, const int action, int)
 {
-    auto* context = static_cast<UserContext*>(glfwGetWindowUserPointer(window));
+    auto* context = static_cast<nsk_cg::UserContext*>(glfwGetWindowUserPointer(window));
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
         context->OnLeftMouseButtonAction(true);

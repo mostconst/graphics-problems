@@ -1,7 +1,10 @@
 ﻿#pragma once
 #include "glad/glad.h"
 
-enum class AttribType : GLenum
+namespace nsk_cg
+{
+enum class AttributeType : GLenum
 {
     Float = GL_FLOAT
 };
+}

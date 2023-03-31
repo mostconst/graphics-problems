@@ -4,6 +4,9 @@ file(GLOB PROJECT_SOURCES
 Sources/main.cpp
 Sources/tesselate.cpp
 Sources/helper.cpp
+Sources/IndexTriangle.h
+Sources/IndexTriangle.cpp
+Sources/TriangleCalculator.cpp
 )
 file(GLOB PROJECT_SHADERS Shaders/*.comp
                           Shaders/*.frag

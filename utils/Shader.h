@@ -3,7 +3,9 @@
 
 #include "glad/glad.h"
 
-class Shader
+namespace nsk_cg
+{
+class Shader final
 {
 public:
     enum class Type : GLenum
@@ -24,3 +26,4 @@ public:
 private:
     unsigned int id;
 };
+}

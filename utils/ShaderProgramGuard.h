@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include "MovableHandle.h"
 
-class ShaderProgramGuard
+namespace nsk_cg
+{
+class ShaderProgramGuard final
 {
 public:
     ShaderProgramGuard();
@@ -16,3 +18,4 @@ public:
 private:
     MovableHandle handle;
 };
+}

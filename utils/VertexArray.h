@@ -3,6 +3,8 @@
 #include "helper_enums.h"
 #include "glad/glad.h"
 
+namespace nsk_cg
+{
 class VertexArray final
 {
 public:
@@ -14,17 +16,17 @@ public:
     VertexArray& operator=(VertexArray&& other) noexcept = default;
 
     void vertexAttribPointer(const ArrayBuffer& arrayBuffer,
-                             GLuint index,
-                             GLint size,
-                             const AttribType type,
-                             GLboolean normalized,
-                             GLsizei stride,
-                             size_t offset);
-    void enableVertexAttribArray(GLuint index);
+        GLuint index,
+        GLint size,
+        AttributeType type,
+        GLboolean normalized,
+        GLsizei stride,
+        size_t offset) const;
+    void enableVertexAttribArray(GLuint index) const;
     void drawElements(GLenum mode,
-                      size_t count,
-                      GLenum type,
-                      const void* indices) const;
+        size_t count,
+        GLenum type,
+        const void* indices) const;
     void Bind() const { glBindVertexArray(handle.GetRaw()); }
 
     unsigned int GetRaw() const { return handle.GetRaw(); }
@@ -32,3 +34,4 @@ public:
 private:
     MovableHandle handle;
 };
+}

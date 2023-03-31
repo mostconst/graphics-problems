@@ -1,10 +1,12 @@
-﻿#include "shader_s.h"
+﻿#include "ShaderProgram.h"
 
 #include <fstream>
 #include <sstream>
 
 #include "Shader.h"
 
+namespace nsk_cg
+{
 ShaderProgram createShader(const char* vertexPath, const char* fragmentPath)
 {
     // 1. retrieve the vertex/fragment source code from filePath
@@ -19,7 +21,7 @@ ShaderProgram createShader(const char* vertexPath, const char* fragmentPath)
     vShaderStream << vShaderFile.rdbuf();
     fShaderStream << fShaderFile.rdbuf();
 
-    return { vShaderStream.str(), fShaderStream.str()};
+    return { vShaderStream.str(), fShaderStream.str() };
 }
 
 ShaderProgram::ShaderProgram(const std::string& vertexCode, const std::string& fragmentCode)
@@ -54,9 +56,10 @@ void ShaderProgram::SetMat4(const std::string& name, const glm::mat4& mat) const
     glUniformMatrix4fv(location, 1, GL_FALSE, &mat[0][0]);
 }
 
-void ShaderProgram::SetFloat(const std::string& name, float value) const
+void ShaderProgram::SetFloat(const std::string& name, const float value) const
 {
     const GLint location = glGetUniformLocation(guard.GetRaw(), name.c_str());
     assert(location != -1);
     glUniform1f(location, value);
+}
 }

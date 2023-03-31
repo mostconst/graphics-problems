@@ -8,7 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "shader_s.h"
+#include "ShaderProgram.h"
 #include "gldebug.h"
 #include "ArrayBuffer.h"
 #include "VertexArray.h"
@@ -21,8 +21,8 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double screenX, double screenY);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
-VertexArray LoadBuffers(const GeometryObject& object, std::vector<ArrayBuffer>& arrayBuffers,
-                        std::vector<ElementBuffer>& elementBuffers)
+nsk_cg::VertexArray LoadBuffers(const nsk_cg::GeometryObject& object, std::vector<nsk_cg::ArrayBuffer>& arrayBuffers,
+                        std::vector<nsk_cg::ElementBuffer>& elementBuffers)
 {
     const auto& colors = object.GetColors();
     const auto& vertices = object.GetVertices();
@@ -31,16 +31,16 @@ VertexArray LoadBuffers(const GeometryObject& object, std::vector<ArrayBuffer>& 
     using VertexType = std::remove_reference_t<decltype(vertices)>::value_type;
     using IndexType= std::remove_reference_t<decltype(indices)>::value_type;
 
-    ArrayBuffer positionsVBO;
+    nsk_cg::ArrayBuffer positionsVBO;
     positionsVBO.bufferData(vertices.size() * sizeof(VertexType), vertices.data(),
                             GL_STATIC_DRAW);
-    ArrayBuffer colorsVBO;
+    nsk_cg::ArrayBuffer colorsVBO;
     colorsVBO.bufferData(colors.size() * sizeof(ColorType), colors.data(),
                          GL_STATIC_DRAW);
 
     // HW_ITEM 7
     constexpr int positionIndex = 0;
-    VertexArray vao;
+    nsk_cg::VertexArray vao;
     vao.vertexAttribPointer(positionsVBO, positionIndex, VertexType::nComponents, VertexType::componentType, GL_FALSE, 0, 0);
     vao.enableVertexAttribArray(positionIndex);
 
@@ -48,7 +48,7 @@ VertexArray LoadBuffers(const GeometryObject& object, std::vector<ArrayBuffer>& 
     vao.vertexAttribPointer(colorsVBO, colorIndex, ColorType::nComponents, ColorType::componentType, GL_FALSE, 0, 0);
     vao.enableVertexAttribArray(colorIndex);
 
-    ElementBuffer ebo;
+    nsk_cg::ElementBuffer ebo;
     ebo.bufferData(vao, indices.size() * sizeof(IndexType),
                    object.GetIndices().data(),
                    GL_STATIC_DRAW);
@@ -75,7 +75,7 @@ int main()
     constexpr float platformSize = 5.0f;
     constexpr glm::vec3 lookAt(-1.0f, -1.0f, 0.0f);
     // HW_ITEM 3
-    UserContext userContext(lookAt, 5.5f);
+    nsk_cg::UserContext userContext(lookAt, 5.5f);
 
     GLFWwindow* window = glfwCreateWindow(userContext.GetScreenWidth(), userContext.GetScreenHeight(), "Problem 1",
                                           nullptr, nullptr);
@@ -98,13 +98,13 @@ int main()
     }
 
 #ifndef NDEBUG
-    enableDebugOutput();
+    nsk_cg::enableDebugOutput();
 #endif
 
-    ShaderProgram ourShader;
+    nsk_cg::ShaderProgram ourShader;
     try
     {
-        ourShader = createShader("shader.vs", "shader.fs");
+        ourShader = nsk_cg::createShader("shader.vs", "shader.fs");
     }
     catch (std::ifstream::failure& e)
     {
@@ -117,20 +117,20 @@ int main()
         return EXIT_FAILURE;
     }
 
-    const GeometryObject cube = makeRainbowCube();
-    const GeometryObject platform = makePlatform(platformSize);
+    const nsk_cg::GeometryObject cube = nsk_cg::makeRainbowCube();
+    const nsk_cg::GeometryObject platform = nsk_cg::makePlatform(platformSize);
 
-    std::vector<ArrayBuffer> arrayBuffers;
-    std::vector<ElementBuffer> elementBuffers;
-    VertexArray cubeVAO = LoadBuffers(cube, arrayBuffers, elementBuffers);
-    VertexArray rectVAO = LoadBuffers(platform, arrayBuffers, elementBuffers);
+    std::vector<nsk_cg::ArrayBuffer> arrayBuffers;
+    std::vector<nsk_cg::ElementBuffer> elementBuffers;
+    nsk_cg::VertexArray cubeVAO = LoadBuffers(cube, arrayBuffers, elementBuffers);
+    nsk_cg::VertexArray rectVAO = LoadBuffers(platform, arrayBuffers, elementBuffers);
 
     // HW_ITEM 6
-    const std::vector<DrawData> objectsToDraw = {
-        DrawData(&rectVAO, glm::mat4(1.0f),
-                 platform.GetIndices().size()),
-        DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), firstCubeLocation), cube.GetIndices().size()),
-        DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), secondCubeLocation), cube.GetIndices().size()),
+    const std::vector<nsk_cg::DrawData> objectsToDraw = {
+        nsk_cg::DrawData(&rectVAO, glm::mat4(1.0f),
+                         platform.GetIndices().size()),
+        nsk_cg::DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), firstCubeLocation), cube.GetIndices().size()),
+        nsk_cg::DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), secondCubeLocation), cube.GetIndices().size()),
     };
 
     // HW_ITEM 9
@@ -171,19 +171,19 @@ void processInput(GLFWwindow* window)
 
 void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
 {
-    auto* context = static_cast<UserContext*>(glfwGetWindowUserPointer(window));
+    auto* context = static_cast<nsk_cg::UserContext*>(glfwGetWindowUserPointer(window));
     context->OnWindowSizeChange(width, height);
 }
 
 void mouse_callback(GLFWwindow* window, const double screenX, const double screenY)
 {
-    auto* context = static_cast<UserContext*>(glfwGetWindowUserPointer(window));
+    auto* context = static_cast<nsk_cg::UserContext*>(glfwGetWindowUserPointer(window));
     context->OnMouseMove(screenX, screenY);
 }
 
 void mouse_button_callback(GLFWwindow* window, const int button, const int action, int)
 {
-    auto* context = static_cast<UserContext*>(glfwGetWindowUserPointer(window));
+    auto* context = static_cast<nsk_cg::UserContext*>(glfwGetWindowUserPointer(window));
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
         context->OnLeftMouseButtonAction(true);

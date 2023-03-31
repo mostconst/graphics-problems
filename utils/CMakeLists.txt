@@ -2,18 +2,21 @@ add_library(
 utils
 
 "camera.cpp"
+"camera.h"
 "ArrayBuffer.cpp"
+"ArrayBuffer.h"
 "VertexArray.cpp"
 "MovableHandle.cpp"
 "math_util.cpp"
-"shader_s.cpp"
+"ShaderProgram.cpp"
 "Shader.cpp"
 "ShaderProgramGuard.cpp"
 "Color.cpp"
 "Vertex.h"
 "GeometryObject.cpp"
 "UserContext.cpp"
-"convertion.h"
+"conversion.h"
+"gldebug.cpp"
 )
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)

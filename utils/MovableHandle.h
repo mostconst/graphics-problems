@@ -1,7 +1,8 @@
 ﻿#pragma once
-#include "glad/glad.h"
 
-class MovableHandle
+namespace nsk_cg
+{
+class MovableHandle final
 {
 public:
     MovableHandle(unsigned int handle);
@@ -15,3 +16,4 @@ public:
 private:
     unsigned int handle;
 };
+}

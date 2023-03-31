@@ -3,6 +3,8 @@
 #include "VertexArray.h"
 #include "glad/glad.h"
 
+namespace nsk_cg
+{
 unsigned int createBuffer()
 {
     unsigned int res;
@@ -20,7 +22,7 @@ ArrayBuffer::~ArrayBuffer()
     glDeleteBuffers(1, &handle.GetRaw());
 }
 
-void ArrayBuffer::bufferData(size_t size, const void* data, GLenum usage) const
+void ArrayBuffer::bufferData(const size_t size, const void* data, const GLenum usage) const
 {
     Bind();
     glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(size), data, usage);
@@ -41,7 +43,7 @@ ElementBuffer::~ElementBuffer()
     glDeleteBuffers(1, &handle.GetRaw());
 }
 
-void ElementBuffer::bufferData(const VertexArray& vertexArray, size_t size, const void* data, GLenum usage) const
+void ElementBuffer::bufferData(const nsk_cg::VertexArray& vertexArray, const size_t size, const void* data, const GLenum usage) const
 {
     vertexArray.Bind();
     Bind();
@@ -51,4 +53,5 @@ void ElementBuffer::bufferData(const VertexArray& vertexArray, size_t size, cons
 void ElementBuffer::Bind() const
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle.GetRaw());
+}
 }

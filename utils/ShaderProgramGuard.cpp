@@ -1,5 +1,8 @@
 ﻿#include "ShaderProgramGuard.h"
+#include "glad/glad.h"
 
+namespace nsk_cg
+{
 ShaderProgramGuard::ShaderProgramGuard()
     : handle(0)
 {
@@ -18,4 +21,5 @@ ShaderProgramGuard::~ShaderProgramGuard()
 unsigned ShaderProgramGuard::GetRaw() const
 {
     return handle.GetRaw();
+}
 }

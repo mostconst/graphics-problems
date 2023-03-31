@@ -2,16 +2,18 @@
 
 #include <cassert>
 
-GeometryObject::GeometryObject(std::vector<utils::Vertex> vertices, std::vector<utils::Color> colors,
-                               std::vector<unsigned int> indices)
+namespace nsk_cg
+{
+GeometryObject::GeometryObject(std::vector<Vertex> vertices, std::vector<utils::Color> colors,
+    std::vector<unsigned int> indices)
     : m_vertices(std::move(vertices)),
-      m_colors(std::move(colors)),
-      m_indices(std::move(indices))
+    m_colors(std::move(colors)),
+    m_indices(std::move(indices))
 {
     assert(m_vertices.size() == m_colors.size());
 }
 
-const std::vector<utils::Vertex>& GeometryObject::GetVertices() const
+const std::vector<Vertex>& GeometryObject::GetVertices() const
 {
     return m_vertices;
 }
@@ -28,7 +30,7 @@ const std::vector<unsigned int>& GeometryObject::GetIndices() const
 
 GeometryObject makeRainbowCube()
 {
-    std::vector<utils::Vertex> vertices = {
+    std::vector<Vertex> vertices = {
         {-0.5f, -0.5f, 0.5f},
         {0.5f, -0.5f, 0.5f},
         {-0.5f, 0.5f, 0.5f},
@@ -56,22 +58,23 @@ GeometryObject makeRainbowCube()
         4, 5, 1, 4, 1, 0,
         2, 3, 7, 2, 7, 6,
     };
-    return {std::move(vertices), std::move(colors), std::move(indices)};
+    return { std::move(vertices), std::move(colors), std::move(indices) };
 }
 
 GeometryObject makePlatform(float size)
 {
-    std::vector<utils::Vertex> vertices = {
+    std::vector<Vertex> vertices = {
         {-size, -size, 0.0f},
         {size, -size, 0.0f},
         {size, size, 0.0f},
         {-size, size, 0.0f},
     };
-    std::vector<utils::Color> colors(4, {0.5f, 0.5f, 0.5f});
+    std::vector<utils::Color> colors(4, { 0.5f, 0.5f, 0.5f });
     std::vector<unsigned int> indices = {
         0, 1, 2,
         0, 2, 3,
     };
 
-    return {std::move(vertices), std::move(colors), std::move(indices)};
+    return { std::move(vertices), std::move(colors), std::move(indices) };
+}
 }

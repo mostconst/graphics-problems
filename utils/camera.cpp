@@ -3,6 +3,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+namespace nsk_cg
+{
 glm::mat4 Camera::GetViewMatrix() const
 {
     const glm::vec3 towards = glm::cross(right, up);
@@ -28,4 +30,5 @@ void Camera::RotateVertical(const float angle)
     glm::mat4 rotation(1.0f);
     rotation = glm::rotate(rotation, angle, up);
     right = glm::vec3(rotation * glm::vec4(right, 0.0f));
+}
 }

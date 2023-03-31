@@ -6,8 +6,10 @@
 
 #include "ShaderProgramGuard.h"
 
+namespace nsk_cg
+{
 // HW_ITEM 1
-class ShaderProgram
+class ShaderProgram final
 {
 public:
     ShaderProgram() = default;
@@ -22,3 +24,4 @@ private:
 };
 
 ShaderProgram createShader(const char* vertexPath, const char* fragmentPath);
+}

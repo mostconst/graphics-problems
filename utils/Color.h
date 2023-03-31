@@ -2,41 +2,26 @@
 #include <cstdint>
 #include "helper_enums.h"
 
-namespace utils
+namespace nsk_cg::utils
 {
-	class Color
-	{
-	public:
-		Color(uint32_t color);
+class Color final
+{
+public:
+	Color(uint32_t color);
+	Color(float red, float green, float blue);
 
-		Color(float red, float green, float blue);
+    float GetRed() const;
+	float GetGreen() const;
+	float GetBlue() const;
+	static size_t GetComponentSize();
 
-        float GetRed() const
-		{
-			return red;
-		}
+private:
+	const float red;
+	const float green;
+	const float blue;
 
-		float GetGreen() const
-		{
-			return green;
-		}
-
-		float GetBlue() const
-		{
-			return blue;
-		}
-
-		static size_t GetComponentSize()
-		{
-			return sizeof(decltype(red));
-		}
-	private:
-		const float red;
-		const float green;
-		const float blue;
-
-	public:
-		static constexpr size_t nComponents = 3;
-		static constexpr AttribType componentType = AttribType::Float;
-	};
+public:
+	static constexpr size_t nComponents = 3;
+	static constexpr AttributeType componentType = AttributeType::Float;
+};
 }

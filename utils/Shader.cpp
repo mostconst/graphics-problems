@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 
+namespace nsk_cg
+{
 Shader::Shader(Type type)
     : id(glCreateShader(static_cast<GLenum>(type)))
 {
@@ -32,4 +34,5 @@ void Shader::Compile(const std::string& code) const
 unsigned Shader::GetId() const
 {
     return id;
+}
 }

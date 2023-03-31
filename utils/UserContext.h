@@ -3,44 +3,21 @@
 
 #include "camera.h"
 #include "math_util.h"
-#include "UserContext.h"
 #include "glm/fwd.hpp"
-#include "glm/ext/matrix_clip_space.hpp"
 
-class UserContext
+namespace nsk_cg
+{
+class UserContext final
 {
 public:
-    UserContext(glm::vec3 lookAt, float cameraDistance);
+    UserContext(const glm::vec3& lookAt, float cameraDistance);
 
-    int GetScreenWidth() const
-    {
-        return screenWidth;
-    }
-
-    int GetScreenHeight() const
-    {
-        return screenHeight;
-    }
-
-    double GetCameraSensitivity() const
-    {
-        return cameraSensitivity;
-    }
-
-    const Camera& GetCamera() const
-    {
-        return camera;
-    }
-
-    const glm::mat4& GetProjection() const
-    {
-        return projection;
-    }
-
-    glm::mat4 GetViewMatrix() const
-    {
-        return camera.GetViewMatrix();
-    }
+    int GetScreenWidth() const;
+    int GetScreenHeight() const;
+    double GetCameraSensitivity() const;
+    const Camera& GetCamera() const;
+    const glm::mat4& GetProjection() const;
+    glm::mat4 GetViewMatrix() const;
 
     void OnWindowSizeChange(int width, int height);
     void OnMouseMove(double screenX, double screenY);
@@ -63,3 +40,4 @@ private:
         static_cast<float>(screenWidth) / static_cast<float>(screenHeight), zNear,
         zFar);
 };
+}
