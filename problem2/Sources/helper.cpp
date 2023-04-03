@@ -79,8 +79,8 @@ GeometryObject makePyramid(const int tesselationLevel)
 
     const auto tessResult = tesselateIterative(tesselationLevel);
 
-    const auto vertices = tessResult.first;
-    const auto triangles = tessResult.second;
+    const auto& vertices = tessResult.GetVertices();
+    const auto& triangles = tessResult.GetTriangles();
 
     std::vector<Vertex> verticesRes;
     verticesRes.reserve(vertices.size());

@@ -10,21 +10,21 @@
 
 namespace nsk_cg
 {
-IndexedGeometry tesselate(const std::vector<glm::vec3>& vertices, const std::vector<nsk_cg::IndexTriangle>& triangles)
+Mesh tesselate(const std::vector<Vertex>& vertices, const std::vector<IndexTriangle>& triangles)
 {
     auto out_vertices = vertices;
-    std::vector<nsk_cg::IndexTriangle> outTriangles;
+    std::vector<IndexTriangle> outTriangles;
     for (const auto& triangle : triangles)
     {
         const auto ind0 = triangle.First();
         const auto ind1 = triangle.Second();
         const auto ind2 = triangle.Third();
-        const auto ind3 = nsk_cg::glSize(out_vertices) + 0;
-        const auto ind4 = nsk_cg::glSize(out_vertices) + 1;
-        const auto ind5 = nsk_cg::glSize(out_vertices) + 2;
-        out_vertices.push_back((vertices[ind1] + vertices[ind2]) / 2.0f);
-        out_vertices.push_back((vertices[ind0] + vertices[ind2]) / 2.0f);
-        out_vertices.push_back((vertices[ind0] + vertices[ind1]) / 2.0f);
+        const auto ind3 = glSize(out_vertices) + 0;
+        const auto ind4 = glSize(out_vertices) + 1;
+        const auto ind5 = glSize(out_vertices) + 2;
+        out_vertices.push_back(middle(vertices[ind1], vertices[ind2]));
+        out_vertices.push_back(middle(vertices[ind0], vertices[ind2]));
+        out_vertices.push_back(middle(vertices[ind0], vertices[ind1]));
 
         outTriangles.emplace_back(ind0, ind5, ind4);
         outTriangles.emplace_back(ind5, ind1, ind3);
@@ -35,9 +35,9 @@ IndexedGeometry tesselate(const std::vector<glm::vec3>& vertices, const std::vec
     return { out_vertices, outTriangles };
 }
 
-IndexedGeometry getInitialPyramid()
+Mesh getInitialPyramid()
 {
-    std::vector<glm::vec3> vertices = {
+    std::vector<Vertex> vertices = {
         {0.0f, 0.0f, 1.0f},
         {1.0f, 0.0f, 0.0f},
         {0.0f, 1.0f, 0.0f},
@@ -45,7 +45,7 @@ IndexedGeometry getInitialPyramid()
         {0.0f, -1.0f, 0.0f},
         {0.0f, 0.0f, -1.0f},
     };
-    std::vector<nsk_cg::IndexTriangle> indices = {
+    std::vector<IndexTriangle> indices = {
         {0, 1, 2},
         {0, 2, 3},
         {0, 3, 4},
@@ -59,13 +59,13 @@ IndexedGeometry getInitialPyramid()
     return { std::move(vertices), std::move(indices) };
 }
 
-IndexedGeometry tesselateRecursive(const IndexedGeometry& initial, const int tesselationLevel)
+Mesh tesselateRecursive(const Mesh& initial, const int tesselationLevel)
 {
     auto tessResult = initial;
 
     for (int i = 0; i < tesselationLevel; ++i)
     {
-        tessResult = tesselate(tessResult.first, tessResult.second);
+        tessResult = tesselate(tessResult.GetVertices(), tessResult.GetTriangles());
     }
 
     return tessResult;
@@ -82,26 +82,26 @@ static int indexFromEnd(const int index, const int total)
     return total - 1 - index;
 }
 
-IndexedGeometry tesselateIterative(const IndexedGeometry& input, const int tesselationLevel)
+Mesh tesselateIterative(const Mesh& input, const int tesselationLevel)
 {
     assert(tesselationLevel > 0);
-    assert(sizeToInt(input.second.size()) == TriangleCalculator::TotalSides());
-    const auto& triangles = input.second;
-    std::vector<glm::vec3> outVertices = input.first;
+    assert(sizeToInt(input.GetTriangles().size()) == TriangleCalculator::TotalSides());
+    const auto& triangles = input.GetTriangles();
+    std::vector<Vertex> outVertices = input.GetVertices();
     const TriangleCalculator triangleCalculator{ tesselationLevel };
-    std::vector<nsk_cg::IndexTriangle> outTriangles;
+    std::vector<IndexTriangle> outTriangles;
     outTriangles.reserve(triangles.size() * triangleCalculator.getTrianglesInFace());
 
-    for (int face = 0; face < nsk_cg::sizeToInt(triangles.size()); ++face)
+    for (int face = 0; face < sizeToInt(triangles.size()); ++face)
     {
         const auto& faceTriangle = triangles[face];
-        const glm::vec3& vertex0 = input.first[faceTriangle.First()];
-        const glm::vec3& vertex1 = input.first[faceTriangle.Second()];
-        const glm::vec3& vertex2 = input.first[faceTriangle.Third()];
+        const Vertex& vertex0 = input.GetVertices()[faceTriangle.First()];
+        const Vertex& vertex1 = input.GetVertices()[faceTriangle.Second()];
+        const Vertex& vertex2 = input.GetVertices()[faceTriangle.Third()];
         const int nRows = triangleCalculator.getRowsPerFace();
         const int lastRow = nRows - 1;
-        const glm::vec3 downUnit = (vertex1 - vertex0) / static_cast<float>(nRows);
-        const glm::vec3 rightUnit = (vertex2 - vertex1) / static_cast<float>(nRows);
+        const glm::vec3 downUnit = vertex1.Subtract(vertex0) / static_cast<float>(nRows);
+        const glm::vec3 rightUnit = vertex2.Subtract(vertex1) / static_cast<float>(nRows);
         for (int row = 0; row < nRows; ++row)
         {
             const int trianglesInRow = TriangleCalculator::getTrianglesInRow(row);
@@ -139,8 +139,8 @@ IndexedGeometry tesselateIterative(const IndexedGeometry& input, const int tesse
                             }
                             else
                             {
-                                index1 = nsk_cg::glSize(outVertices);
-                                outVertices.push_back(vertex0 + downUnit * static_cast<float>(row + 1));
+                                index1 = glSize(outVertices);
+                                outVertices.push_back(vertex0.AddVector(downUnit * static_cast<float>(row + 1)));
                             }
                         }
                         else
@@ -170,8 +170,8 @@ IndexedGeometry tesselateIterative(const IndexedGeometry& input, const int tesse
                         }
                         else
                         {
-                            index2 = nsk_cg::glSize(outVertices);
-                            outVertices.push_back(vertex0 + downUnit * static_cast<float>(row + 1) + rightUnit * (static_cast<float>(col) / 2 + 1));
+                            index2 = glSize(outVertices);
+                            outVertices.push_back(vertex0.AddVector(downUnit * static_cast<float>(row + 1) + rightUnit * (static_cast<float>(col) / 2 + 1)));
                         }
                     }
                     outTriangles.emplace_back(index0, index1, index2);
@@ -189,7 +189,7 @@ IndexedGeometry tesselateIterative(const IndexedGeometry& input, const int tesse
     return { outVertices, outTriangles };
 }
 
-IndexedGeometry tesselateIterative(const int tesselationLevel)
+Mesh tesselateIterative(const int tesselationLevel)
 {
     return tesselateIterative(getInitialPyramid(), tesselationLevel);
 }

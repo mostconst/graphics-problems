@@ -4,8 +4,6 @@ file(GLOB PROJECT_SOURCES
 Sources/main.cpp
 Sources/tesselate.cpp
 Sources/helper.cpp
-Sources/IndexTriangle.h
-Sources/IndexTriangle.cpp
 Sources/TriangleCalculator.cpp
 )
 file(GLOB PROJECT_SHADERS Shaders/*.comp
@@ -41,6 +39,8 @@ if(GRAPHICS_PROBLEMS_BUILD_TESTS)
 	add_executable(
 	  tesselate_test
 	  Sources/tesselate_test.cpp
+      Sources/tesselate.cpp
+      Sources/TriangleCalculator.cpp
 	)
 	target_link_libraries(
 	  tesselate_test

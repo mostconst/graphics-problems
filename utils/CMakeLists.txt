@@ -13,10 +13,15 @@ utils
 "ShaderProgramGuard.cpp"
 "Color.cpp"
 "Vertex.h"
+"Vertex.cpp"
 "GeometryObject.cpp"
 "UserContext.cpp"
 "conversion.h"
 "gldebug.cpp"
+"Mesh.h"
+"Mesh.cpp"
+"IndexTriangle.h"
+"IndexTriangle.cpp"
 )
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
