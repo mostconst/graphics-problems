@@ -1,5 +1,7 @@
 ﻿#include "IndexTriangle.h"
 
+#include <cassert>
+
 namespace nsk_cg
 {
 unsigned IndexTriangle::First() const
@@ -22,6 +24,8 @@ IndexTriangle::IndexTriangle(const unsigned first, const unsigned second, const 
     second(second),
     third(third)
 {
-
+    assert(first != second);
+    assert(second != third);
+    assert(first != third);
 }
 }

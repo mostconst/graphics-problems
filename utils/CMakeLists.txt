@@ -22,6 +22,11 @@ utils
 "Mesh.cpp"
 "IndexTriangle.h"
 "IndexTriangle.cpp"
+"VertexTriangle.h"
+"VertexTriangle.cpp"
+"comparison.h"
+"tesselate.cpp"
+"TriangleCalculator.cpp"
 )
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)

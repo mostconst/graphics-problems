@@ -2,9 +2,7 @@ file(GLOB VENDORS_SOURCES ../external/glad/src/glad.c)
 file(GLOB PROJECT_HEADERS Headers/*.hpp)
 file(GLOB PROJECT_SOURCES
 Sources/main.cpp
-Sources/tesselate.cpp
 Sources/helper.cpp
-Sources/TriangleCalculator.cpp
 )
 file(GLOB PROJECT_SHADERS Shaders/*.comp
                           Shaders/*.frag
@@ -34,23 +32,6 @@ target_link_libraries(${EXEC_NAME} glfw
                       ${GLFW_LIBRARIES} ${GLAD_LIBRARIES} utils)
 set_target_properties(${EXEC_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${EXEC_NAME})
-
-if(GRAPHICS_PROBLEMS_BUILD_TESTS)
-	add_executable(
-	  tesselate_test
-	  Sources/tesselate_test.cpp
-      Sources/tesselate.cpp
-      Sources/TriangleCalculator.cpp
-	)
-	target_link_libraries(
-	  tesselate_test
-	  utils
-	  GTest::gtest_main
-	)
-
-	include(GoogleTest)
-	gtest_discover_tests(tesselate_test)
-endif()
 
 add_custom_command(
     TARGET ${EXEC_NAME} POST_BUILD

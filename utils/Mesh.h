@@ -14,7 +14,7 @@ public:
     const std::vector<IndexTriangle>& GetTriangles() const;
 
 private:
-    std::vector<Vertex> first;
-    std::vector<IndexTriangle> second;
+    std::vector<Vertex> m_vertices;
+    std::vector<IndexTriangle> m_triangles;
 };
 }
