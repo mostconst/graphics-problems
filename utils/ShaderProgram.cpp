@@ -62,4 +62,11 @@ void ShaderProgram::SetFloat(const std::string& name, const float value) const
     assert(location != -1);
     glUniform1f(location, value);
 }
+
+void ShaderProgram::SetVec3(const std::string& name, const glm::vec3& vector) const
+{
+    const GLint location = glGetUniformLocation(guard.GetRaw(), name.c_str());
+    assert(location != -1);
+    glUniform3f(location, vector.x, vector.y, vector.z);
+}
 }

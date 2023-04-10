@@ -23,4 +23,17 @@ const std::vector<IndexTriangle>& Mesh::GetTriangles() const
     return m_triangles;
 }
 
+std::vector<unsigned> Mesh::GetIndices() const
+{
+    std::vector<unsigned int> indicesRes;
+    indicesRes.reserve(m_triangles.size() * 3);
+    for (const auto& triangle : m_triangles)
+    {
+        indicesRes.push_back(triangle.First());
+        indicesRes.push_back(triangle.Second());
+        indicesRes.push_back(triangle.Third());
+    }
+
+    return indicesRes;
+}
 }

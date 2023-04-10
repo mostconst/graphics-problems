@@ -38,4 +38,9 @@ size_t Color::GetComponentSize()
 {
     return sizeof(decltype(red));
 }
+
+glm::vec3 colorAsVector(const Color& color)
+{
+    return { color.GetRed(), color.GetGreen(), color.GetBlue() };
+}
 }

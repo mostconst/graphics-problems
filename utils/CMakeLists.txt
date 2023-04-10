@@ -27,13 +27,13 @@ utils
 "comparison.h"
 "tesselate.cpp"
 "TriangleCalculator.cpp"
-)
+"MeshBuilding.h" "MeshBuilding.cpp")
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
 	add_executable(
 	  camera_test
 	  camera_test.cpp
-	)
+	 "MeshBuilding.h" "MeshBuilding.cpp")
 	target_link_libraries(
 	  camera_test
 	  utils

@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <cstdint>
 #include "helper_enums.h"
+#include "glm/vec3.hpp"
 
 namespace nsk_cg::utils
 {
@@ -24,4 +25,6 @@ public:
 	static constexpr size_t nComponents = 3;
 	static constexpr AttributeType componentType = AttributeType::Float;
 };
+
+glm::vec3 colorAsVector(const Color& color);
 }
