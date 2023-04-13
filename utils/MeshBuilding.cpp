@@ -1,8 +1,14 @@
 #include "MeshBuilding.h"
 
+#include <algorithm>
+#include <iterator>
+
+#include "tesselate.h"
+#include "VertexTriangle.h"
+
 namespace nsk_cg
 {
-Mesh makeCubeWithUniqueVertices()
+IndexedVertices makeCubeWithUniqueVertices()
 {
     std::vector<Vertex> vertices = {
         {-0.5f, -0.5f, 0.5f},
@@ -34,6 +40,7 @@ Mesh makeCubeWithUniqueVertices()
 
 Mesh makeCubeForLighting()
 {
+    // TODO remove duplication
     const std::vector<Vertex> vertices = {
     {-0.5f, -0.5f, 0.5f},
     {0.5f, -0.5f, 0.5f},
@@ -53,7 +60,7 @@ Mesh makeCubeForLighting()
         2, 3, 7, 2, 7, 6,
     };
     std::vector<Vertex> resultVertices;
-    std::vector<IndexTriangle> resultIndices;
+    std::vector<IndexTriangle> indexTriangles;
     constexpr size_t cubeFaces = 6;
     for (size_t face = 0; face < cubeFaces; ++face)
     {
@@ -66,9 +73,37 @@ Mesh makeCubeForLighting()
 
         const size_t vertOffset = face * 4;
 
-        resultIndices.emplace_back(vertOffset + 0, vertOffset + 1, vertOffset + 2);
-        resultIndices.emplace_back(vertOffset + 0, vertOffset + 2, vertOffset + 3);
+        indexTriangles.emplace_back(vertOffset + 0, vertOffset + 1, vertOffset + 2);
+        indexTriangles.emplace_back(vertOffset + 0, vertOffset + 2, vertOffset + 3);
     }
-    return { std::move(resultVertices), std::move(resultIndices) };
+
+    std::vector<glm::vec3> normals(resultVertices.size(), glm::vec3(0.0f));
+    for(const auto& triangle : indexTriangles)
+    {
+        const glm::vec3 normal = getNormalVector(VertexTriangle(resultVertices[triangle.First()], resultVertices[triangle.Second()], resultVertices[triangle.Third()]));
+        normals[triangle.First()] = normal;
+        normals[triangle.Second()] = normal;
+        normals[triangle.Third()] = normal;
+    }
+    return { std::move(resultVertices), indexTriangles, std::move(normals) };
+}
+
+Mesh makeSphere(const int tesselationLevel)
+{
+    const auto tessResult = tesselateIterative(tesselationLevel);
+    const auto& pyramidVertices = tessResult.GetVertices();
+    std::vector<nsk_cg::Vertex> morphedVertices;
+    morphedVertices.reserve(pyramidVertices.size());
+    std::transform(pyramidVertices.cbegin(), pyramidVertices.cend(), std::back_inserter(morphedVertices),
+                   mapToUnitSphere);
+
+    std::vector<glm::vec3> normals;
+    normals.reserve(morphedVertices.size());
+    for(const auto& vertex : morphedVertices)
+    {
+        normals.push_back(vertex.ToVector());
+    }
+
+    return {morphedVertices, tessResult.GetTriangles(), normals};
 }
 }

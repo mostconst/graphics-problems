@@ -18,8 +18,8 @@ utils
 "UserContext.cpp"
 "conversion.h"
 "gldebug.cpp"
-"Mesh.h"
-"Mesh.cpp"
+"IndexedVertices.h"
+"IndexedVertices.cpp"
 "IndexTriangle.h"
 "IndexTriangle.cpp"
 "VertexTriangle.h"
@@ -27,7 +27,10 @@ utils
 "comparison.h"
 "tesselate.cpp"
 "TriangleCalculator.cpp"
-"MeshBuilding.h" "MeshBuilding.cpp")
+"MeshBuilding.h"
+"MeshBuilding.cpp"
+"Mesh.h"
+"Mesh.cpp")
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
 	add_executable(

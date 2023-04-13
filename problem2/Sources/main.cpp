@@ -23,13 +23,6 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double screenX, double screenY);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
-
-nsk_cg::Vertex norm(const nsk_cg::Vertex& v)
-{
-	const auto length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-    return { v.x / length, v.y / length, v.z / length };
-}
-
 struct Problem2Parameters
 {
     static constexpr int tesselationLevel = 5;
@@ -95,7 +88,7 @@ int main()
     const auto& pyramidVertices = pyramid.GetVertices();
     std::vector<nsk_cg::Vertex> morphedVertices;
     morphedVertices.reserve(pyramidVertices.size());
-    std::transform(pyramidVertices.cbegin(), pyramidVertices.cend(), std::back_inserter(morphedVertices), norm);
+    std::transform(pyramidVertices.cbegin(), pyramidVertices.cend(), std::back_inserter(morphedVertices), nsk_cg::mapToUnitSphere);
 
     std::vector<nsk_cg::ArrayBuffer> arrayBuffers;
     std::vector<nsk_cg::ElementBuffer> elementBuffers;

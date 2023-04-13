@@ -10,7 +10,7 @@
 
 namespace nsk_cg
 {
-Mesh tesselate(const std::vector<Vertex>& vertices, const std::vector<IndexTriangle>& triangles)
+IndexedVertices tesselate(const std::vector<Vertex>& vertices, const std::vector<IndexTriangle>& triangles)
 {
     auto out_vertices = vertices;
     std::vector<IndexTriangle> outTriangles;
@@ -35,7 +35,7 @@ Mesh tesselate(const std::vector<Vertex>& vertices, const std::vector<IndexTrian
     return { out_vertices, outTriangles };
 }
 
-Mesh getInitialPyramid()
+IndexedVertices getInitialPyramid()
 {
     std::vector<Vertex> vertices = {
         {0.0f, 0.0f, 1.0f},
@@ -59,7 +59,7 @@ Mesh getInitialPyramid()
     return { std::move(vertices), std::move(indices) };
 }
 
-Mesh tesselateRecursive(const Mesh& initial, const int tesselationLevel)
+IndexedVertices tesselateRecursive(const IndexedVertices& initial, const int tesselationLevel)
 {
     auto tessResult = initial;
 
@@ -82,7 +82,7 @@ static int indexFromEnd(const int index, const int total)
     return total - 1 - index;
 }
 
-Mesh tesselateIterative(const Mesh& input, const int tesselationLevel)
+IndexedVertices tesselateIterative(const IndexedVertices& input, const int tesselationLevel)
 {
     assert(tesselationLevel > 0);
     assert(sizeToInt(input.GetTriangles().size()) == TriangleCalculator::TotalSides());
@@ -189,7 +189,7 @@ Mesh tesselateIterative(const Mesh& input, const int tesselationLevel)
     return { outVertices, outTriangles };
 }
 
-Mesh tesselateIterative(const int tesselationLevel)
+IndexedVertices tesselateIterative(const int tesselationLevel)
 {
     return tesselateIterative(getInitialPyramid(), tesselationLevel);
 }

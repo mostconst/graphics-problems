@@ -5,7 +5,7 @@
 #include "Color.h"
 #include "comparison.h"
 #include "math_util.h"
-#include "Mesh.h"
+#include "IndexedVertices.h"
 #include "tesselate.h"
 #include "VertexTriangle.h"
 #include "glm/gtx/string_cast.hpp"
@@ -41,7 +41,7 @@ namespace nsk_cg
         return true;
     }
 
-    std::vector<VertexTriangle> GetVertexTriangles(const Mesh& mesh)
+    std::vector<VertexTriangle> GetVertexTriangles(const IndexedVertices& mesh)
     {
         std::vector<VertexTriangle> res;
         const auto& vertices = mesh.GetVertices();

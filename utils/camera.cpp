@@ -18,6 +18,12 @@ glm::mat4 Camera::GetViewMatrix() const
     return res;
 }
 
+glm::vec3 Camera::GetViewPosition() const
+{
+    const glm::vec3 towards = glm::cross(right, up);
+    return origin + towards * distance;
+}
+
 void Camera::RotateHorizontal(const float angle)
 {
     glm::mat4 rotation(1.0f);

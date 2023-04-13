@@ -14,4 +14,10 @@ bool equal(const Vertex& v1, const Vertex& v2)
 {
     return distance(v1, v2) < TOLERANCE;
 }
+
+Vertex mapToUnitSphere(const nsk_cg::Vertex& v)
+{
+    const auto length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+    return { v.x / length, v.y / length, v.z / length };
+}
 }

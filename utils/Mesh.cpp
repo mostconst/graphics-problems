@@ -1,15 +1,19 @@
 ﻿#include "Mesh.h"
 
+#include <utility>
+
 namespace nsk_cg
 {
-Mesh::Mesh(std::vector<Vertex> first, std::vector<IndexTriangle> second) : m_vertices(std::move(first)),
-    m_triangles(std::move(second))
+Mesh::Mesh(std::vector<Vertex> vertices, const std::vector<IndexTriangle>& triangles, std::vector<glm::vec3> normals)
+    : m_vertices(std::move(vertices))
+    , m_normals(std::move(normals))
 {
-    for(const auto& triangle: m_triangles)
+    m_indices.reserve(triangles.size() * 3);
+    for (const auto& triangle : triangles)
     {
-        assert(triangle.First() < m_vertices.size());
-        assert(triangle.Second() < m_vertices.size());
-        assert(triangle.Third() < m_vertices.size());
+        m_indices.push_back(triangle.First());
+        m_indices.push_back(triangle.Second());
+        m_indices.push_back(triangle.Third());
     }
 }
 
@@ -18,22 +22,9 @@ const std::vector<Vertex>& Mesh::GetVertices() const
     return m_vertices;
 }
 
-const std::vector<IndexTriangle>& Mesh::GetTriangles() const
+const std::vector<unsigned>& Mesh::GetIndices() const
 {
-    return m_triangles;
+    return m_indices;
 }
 
-std::vector<unsigned> Mesh::GetIndices() const
-{
-    std::vector<unsigned int> indicesRes;
-    indicesRes.reserve(m_triangles.size() * 3);
-    for (const auto& triangle : m_triangles)
-    {
-        indicesRes.push_back(triangle.First());
-        indicesRes.push_back(triangle.Second());
-        indicesRes.push_back(triangle.Third());
-    }
-
-    return indicesRes;
-}
 }

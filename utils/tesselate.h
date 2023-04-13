@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "Mesh.h"
+#include "IndexedVertices.h"
 
 namespace nsk_cg
 {
-Mesh tesselateIterative(int tesselationLevel);
+IndexedVertices tesselateIterative(int tesselationLevel);
 }

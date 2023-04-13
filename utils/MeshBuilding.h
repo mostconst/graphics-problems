@@ -1,8 +1,10 @@
 #pragma once
+#include "IndexedVertices.h"
 #include "Mesh.h"
 
 namespace nsk_cg
 {
-Mesh makeCubeWithUniqueVertices();
+IndexedVertices makeCubeWithUniqueVertices();
 Mesh makeCubeForLighting();
+Mesh makeSphere(int tesselationLevel);
 }

@@ -42,4 +42,5 @@ inline Vertex middle(const Vertex& v1, const Vertex& v2)
 
 float distance(const Vertex& v1, const Vertex& v2);
 bool equal(const Vertex& v1, const Vertex& v2);
+Vertex mapToUnitSphere(const nsk_cg::Vertex& v);
 }
