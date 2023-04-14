@@ -131,7 +131,7 @@ int main()
     nsk_cg::ShaderProgram lightSourceShader;
     try
     {
-        ourShader = nsk_cg::createShader("shader.vert", "shader.frag");
+        ourShader = nsk_cg::createShader("GourandBlinn.vert", "Gourand.frag");
         lightSourceShader = nsk_cg::createShader("lightSourceShader.vs", "lightSourceShader.fs");
     }
     catch (std::ifstream::failure& e)
@@ -145,7 +145,7 @@ int main()
         return EXIT_FAILURE;
     }
 
-    const nsk_cg::Mesh cube = nsk_cg::makeSphere(5);
+    const nsk_cg::Mesh cube = nsk_cg::makeSphere(4);
     //const nsk_cg::Mesh cube = nsk_cg::makeCubeForLighting();
 
     std::vector<nsk_cg::ArrayBuffer> arrayBuffers;
