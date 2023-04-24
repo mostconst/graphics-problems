@@ -1,9 +1,9 @@
-#version 330 core
-layout (location = 0) in vec3 vertexId;
-out vec2 v_uv;
+#version 110
+attribute vec3 vertexId;
+varying vec2 v_uv;
 void main()
 {
-   uint idx = uint(vertexId);
-   gl_Position = vec4(idx & 1U, idx >> 1U, 0.0, 0.5 ) * 4.0 - 1.0;
+   int idx = int(vertexId);
+   gl_Position = vec4(idx & 1, idx >> 1, 0.0, 0.5 ) * 4.0 - 1.0;
    v_uv = vec2(gl_Position.xy * 0.5 + 0.5 );
 }

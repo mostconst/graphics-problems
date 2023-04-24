@@ -63,9 +63,9 @@ nsk_cg::VertexArray LoadBuffers(const nsk_cg::GeometryObject& object, std::vecto
 int main()
 {
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
 #ifndef NDEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 #endif
@@ -162,9 +162,10 @@ int main()
         backgroundShader.Use();
         backgroundShader.SetVec4("topcolor", topColor);
         backgroundShader.SetVec4("botcolor", bottomColor);
+        const int attribLocation = backgroundShader.GetAttribLocation("vertexId");
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glVertexAttribPointer(0, 1, GL_INT, GL_FALSE, 0, (void*)0);
+        glVertexAttribPointer(attribLocation, 1, GL_INT, GL_FALSE, 0, (void*)0);
         glEnableVertexAttribArray(0);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

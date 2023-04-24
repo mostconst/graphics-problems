@@ -21,6 +21,7 @@ public:
     void SetVec3(const std::string& name, const glm::vec3& vector) const;
     void SetVec4(const std::string& name, const glm::vec4& vector) const;
     void SetMat3(const std::string& name, const glm::mat3& matrix) const;
+    int GetAttribLocation(const std::string& name) const;
 
 private:
     ShaderProgramGuard guard;
