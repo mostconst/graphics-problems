@@ -122,7 +122,10 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     int vertices[] = {
-         0, 1, 2
+         0 & 1, 0 >> 1,
+        1 & 1, 1 >> 1,
+        2 & 1, 2 >> 1,
+        3 & 1, 3 >> 1,
     };
     unsigned int VBO;
     glGenBuffers(1, &VBO);
@@ -142,6 +145,11 @@ int main()
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    for (int i = 0; i < 4; ++i)
+    {
+        std::cout << (i & 1) * 4 - 1 << " " << (i >> 1) * 4 - 1 << std::endl;
+    }
 
     const glm::vec4 topColor{ 0.682f, 0.682f, 0.682f, 1.0f };
     const glm::vec4 bottomColor{ 0.98f, 0.98f, 0.98f, 1.0f };
@@ -165,9 +173,9 @@ int main()
         const int attribLocation = backgroundShader.GetAttribLocation("vertexId");
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glVertexAttribPointer(attribLocation, 1, GL_INT, GL_FALSE, 0, (void*)0);
-        glEnableVertexAttribArray(0);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glVertexAttribPointer(attribLocation, 2, GL_INT, GL_FALSE, 0, (void*)0);
+        glEnableVertexAttribArray(attribLocation);
+        glDrawArrays(GL_TRIANGLES, 0, 4);
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         // glBindVertexArray(0); // no need to unbind it every time 
 
