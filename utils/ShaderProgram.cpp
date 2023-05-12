@@ -70,10 +70,27 @@ void ShaderProgram::SetVec3(const std::string& name, const glm::vec3& vector) co
     glUniform3f(location, vector.x, vector.y, vector.z);
 }
 
+void ShaderProgram::SetVec3(const int location, const glm::vec3& vector)
+{
+    glUniform3f(location, vector.x, vector.y, vector.z);
+}
+
+void ShaderProgram::SetInt(const int location, const int value)
+{
+    glUniform1i(location, value);
+}
+
 void ShaderProgram::SetMat3(const std::string& name, const glm::mat3& matrix) const
 {
     const GLint location = glGetUniformLocation(guard.GetRaw(), name.c_str());
     assert(location != -1);
     glUniformMatrix3fv(location, 1, GL_FALSE, &matrix[0][0]);
+}
+
+void ShaderProgram::SetInt(const std::string& name, const int value) const
+{
+    const GLint location = glGetUniformLocation(guard.GetRaw(), name.c_str());
+    assert(location != -1);
+    glUniform1i(location, value);
 }
 }

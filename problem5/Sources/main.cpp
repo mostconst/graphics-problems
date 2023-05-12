@@ -69,9 +69,26 @@ struct Material
     float shininess;
 };
 
+enum class LightType
+{
+	Directional = 1,
+    Positional
+};
+
 struct Light
 {
-    glm::vec3 position;
+    Light(const LightType type, const glm::vec3& position, const glm::vec3& direction, const glm::vec3& ambient,
+          const glm::vec3& diffuse, const glm::vec3& specular)
+		: type(type), position(position), direction(direction),
+		  ambient(ambient),
+		  diffuse(diffuse),
+		  specular(specular)
+	{
+	}
+
+    LightType type;
+	glm::vec3 position;
+	glm::vec3 direction;
     glm::vec3 ambient;
     glm::vec3 diffuse;
     glm::vec3 specular;
@@ -88,20 +105,23 @@ int main()
 #endif
 
     constexpr glm::vec3 backgroundColor(0.29f);
-    constexpr glm::vec3 firstCubeLocation(0.0f, 0.0f, 0.0f);
+    constexpr glm::vec3 firstCubeLocation(-2.0f, 0.0f, 0.0f);
+    constexpr glm::vec3 secondCubeLocation(2.0f, 0.0f, 0.0f);
     constexpr Material cubeMaterial = { { 0.8f, 0.8f, 0.8f },
         { 0.392f, 0.392f, 0.705f },
         { 0.5f, 0.5f, 0.5f },
         50.0f
     };
-    constexpr Light light = {{ 10.0f, 10.0f, 10.0f },
+    const Light light = {LightType::Directional,
+    	{ 0.0f, 2.0f, 0.0f },
+        {0.0f, -1.0f, 0.0f},
         { 0.0f, 0.0f, 0.0f },
         { 1.0f, 1.0f, 1.0f },
         { 1.0f, 1.0f, 1.0f },
     };
-    constexpr glm::vec3 lookAt(firstCubeLocation);
+    constexpr glm::vec3 lookAt(0.0f);
     // HW_ITEM 3
-    nsk_cg::UserContext userContext(lookAt, 5.5f);
+    nsk_cg::UserContext userContext(lookAt, 10.0f);
 
     GLFWwindow* window = glfwCreateWindow(userContext.GetScreenWidth(), userContext.GetScreenHeight(), "Problem 1",
                                           nullptr, nullptr);
@@ -154,6 +174,7 @@ int main()
 
     const std::vector<nsk_cg::DrawData> objectsToDraw = {
         nsk_cg::DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), firstCubeLocation), cube.GetIndices().size()),
+        nsk_cg::DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), secondCubeLocation), cube.GetIndices().size()),
     };
     auto lightSource = nsk_cg::DrawData(&cubeVAO, glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)), light.position), cube.GetIndices().size());
 
@@ -173,11 +194,14 @@ int main()
         ourShader.SetVec3("material.specular", cubeMaterial.specular);
         ourShader.SetFloat("material.shininess", cubeMaterial.shininess);
 
+        ourShader.SetInt("light.type", static_cast<int>(light.type));
         ourShader.SetVec3("light.ambient", light.ambient);
         ourShader.SetVec3("light.diffuse", light.diffuse); // darken diffuse light a bit
         ourShader.SetVec3("light.specular", light.specular);
         const glm::vec3 viewLightPosition = glm::vec3(viewMatrix * glm::vec4(light.position, 1.0f));
+        const glm::vec3 viewLightDirection = glm::vec3(viewMatrix * glm::vec4(light.direction, 0.0f));
         ourShader.SetVec3("light.viewPosition", viewLightPosition);
+        ourShader.SetVec3("light.viewDirection", viewLightDirection);
         for (const auto& drawObject : objectsToDraw)
         {
             const glm::mat4 modelViewMatrix = viewMatrix * drawObject.placement;

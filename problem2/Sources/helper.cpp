@@ -64,7 +64,7 @@ std::vector<utils::Color> generateColors(const size_t nColors)
     std::random_device dev;
     std::mt19937 rng(dev());
     std::vector<utils::Color> colors;
-    const std::uniform_int_distribution<std::mt19937::result_type> dist6(0, 0xFFFFFF);
+    std::uniform_int_distribution<std::mt19937::result_type> dist6(0, 0xFFFFFF);
     for (size_t i = 0; i != nColors; ++i)
     {
         colors.emplace_back(dist6(rng));

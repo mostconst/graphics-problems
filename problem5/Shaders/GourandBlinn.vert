@@ -16,7 +16,9 @@ struct Material
 
 struct Light
 {
+    int type;
     vec3 viewPosition;
+    vec3 viewDirection;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -28,15 +30,21 @@ uniform Light light;
 
 out vec3 vertexColor;
 
-void main()
+vec3 colorFromLightSource(vec3 viewFragmentPosition, vec3 viewFragmentNormal, Light light)
 {
-	gl_Position = mvpMatrix * vec4(localPosition, 1.0f);
-	vec3 viewFragmentPosition = vec3(modelViewMatrix * vec4(localPosition, 1.0f));
-	vec3 viewFragmentNormal = normalize(modelViewNormalMatrix * localNormal);
-
     vec3 ambientColor = light.ambient * material.ambient;
 
-    vec3 viewLightDirection = normalize(light.viewPosition - viewFragmentPosition);
+    vec3 viewLightDirectionRaw = vec3(0.0);
+    if (light.type == 1)
+    {
+        viewLightDirectionRaw = -light.viewDirection;
+    }
+    else if (light.type == 2)
+    {
+        viewLightDirectionRaw = light.viewPosition - viewFragmentPosition;
+    }
+    vec3 viewLightDirection = normalize(viewLightDirectionRaw);
+
     float diffuseCoefficient = max(dot(viewFragmentNormal, viewLightDirection), 0.0);
     vec3 diffuseColor = light.diffuse * diffuseCoefficient * material.diffuse;
 
@@ -46,8 +54,18 @@ void main()
 	float specularCoefficient = pow(max(dot(viewFragmentNormal, halfVector), 0.0), material.shininess);
 	vec3 specularColor = light.specular * specularCoefficient * material.specular;
 
-	const vec3 globalAmbientLight = vec3(0.2);
-	vec3 ambientColorGlobal = globalAmbientLight * material.ambient;
+    return ambientColor + diffuseColor + specularColor;
+}
 
-	vertexColor = ambientColor + ambientColorGlobal  + diffuseColor + specularColor;
+void main()
+{
+	gl_Position = mvpMatrix * vec4(localPosition, 1.0f);
+	vec3 viewFragmentPosition = vec3(modelViewMatrix * vec4(localPosition, 1.0f));
+	vec3 viewFragmentNormal = normalize(modelViewNormalMatrix * localNormal);
+
+    const vec3 globalAmbientLight = vec3(0.2);
+	vec3 ambientColorGlobal = globalAmbientLight * material.ambient;
+    vec3 lightSourceColor = colorFromLightSource(viewFragmentPosition, viewFragmentNormal, light);
+
+	vertexColor = ambientColorGlobal + lightSourceColor;
 }
