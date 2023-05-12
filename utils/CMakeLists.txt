@@ -30,7 +30,10 @@ utils
 "MeshBuilding.h"
 "MeshBuilding.cpp"
 "Mesh.h"
-"Mesh.cpp")
+"Mesh.cpp"
+"Material.h"
+"Light.h"
+ "lighting_utils.h" "lighting_utils.cpp")
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
 	add_executable(

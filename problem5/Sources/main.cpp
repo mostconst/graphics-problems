@@ -15,84 +15,14 @@
 #include "DrawData.h"
 #include "MeshBuilding.h"
 #include "UserContext.h"
+#include "Material.h"
+#include "Light.h"
+#include "lighting_utils.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double screenX, double screenY);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-
-nsk_cg::VertexArray LoadBuffers(const nsk_cg::Mesh& object, std::vector<nsk_cg::ArrayBuffer>& arrayBuffers,
-                        std::vector<nsk_cg::ElementBuffer>& elementBuffers)
-{
-    const auto& vertices = object.GetVertices();
-    const auto& indices = object.GetIndices();
-    const auto& normals = object.GetNormals();
-    using VertexType = std::remove_reference_t<decltype(vertices)>::value_type;
-    using IndexType= std::remove_reference_t<decltype(indices)>::value_type;
-    using NormalType = std::remove_reference_t<decltype(normals)>::value_type;
-
-    nsk_cg::ArrayBuffer positionsVBO;
-    positionsVBO.bufferData(vertices.size() * sizeof(VertexType), vertices.data(),
-                            GL_STATIC_DRAW);
-
-    nsk_cg::ArrayBuffer normalsVBO;
-    normalsVBO.bufferData(normals.size() * sizeof(NormalType), normals.data(),
-        GL_STATIC_DRAW);
-
-    nsk_cg::VertexArray vao;
-
-    constexpr int positionIndex = 0;
-    vao.vertexAttribPointer(positionsVBO, positionIndex, VertexType::nComponents, VertexType::componentType, GL_FALSE, 0, 0);
-    vao.enableVertexAttribArray(positionIndex);
-
-    constexpr int normalIndex = 1;
-    vao.vertexAttribPointer(normalsVBO, normalIndex, 3, nsk_cg::AttributeType::Float, GL_FALSE, 0, 0);
-    vao.enableVertexAttribArray(normalIndex);
-
-    nsk_cg::ElementBuffer ebo;
-    ebo.bufferData(vao, indices.size() * sizeof(IndexType),
-                   object.GetIndices().data(),
-                   GL_STATIC_DRAW);
-
-    elementBuffers.push_back(std::move(ebo));
-    arrayBuffers.push_back(std::move(positionsVBO));
-    arrayBuffers.push_back(std::move(normalsVBO));
-
-    return vao;
-}
-
-struct Material
-{
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-    float shininess;
-};
-
-enum class LightType
-{
-	Directional = 1,
-    Positional
-};
-
-struct Light
-{
-    Light(const LightType type, const glm::vec3& position, const glm::vec3& direction, const glm::vec3& ambient,
-          const glm::vec3& diffuse, const glm::vec3& specular)
-		: type(type), position(position), direction(direction),
-		  ambient(ambient),
-		  diffuse(diffuse),
-		  specular(specular)
-	{
-	}
-
-    LightType type;
-	glm::vec3 position;
-	glm::vec3 direction;
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-};
 
 int main()
 {
@@ -107,12 +37,13 @@ int main()
     constexpr glm::vec3 backgroundColor(0.29f);
     constexpr glm::vec3 firstCubeLocation(-2.0f, 0.0f, 0.0f);
     constexpr glm::vec3 secondCubeLocation(2.0f, 0.0f, 0.0f);
-    constexpr Material cubeMaterial = { { 0.8f, 0.8f, 0.8f },
+    constexpr nsk_cg::Material cubeMaterial = { { 0.8f, 0.8f, 0.8f },
         { 0.392f, 0.392f, 0.705f },
         { 0.5f, 0.5f, 0.5f },
         50.0f
     };
-    const Light light = {LightType::Directional,
+    const nsk_cg::Light light = {
+        nsk_cg::LightType::Directional,
     	{ 0.0f, 2.0f, 0.0f },
         {0.0f, -1.0f, 0.0f},
         { 0.0f, 0.0f, 0.0f },
@@ -165,18 +96,17 @@ int main()
         return EXIT_FAILURE;
     }
 
-    const nsk_cg::Mesh cube = nsk_cg::makeSphere(4);
-    //const nsk_cg::Mesh cube = nsk_cg::makeCubeForLighting();
+    const nsk_cg::Mesh sphere = nsk_cg::makeSphere(4);
 
     std::vector<nsk_cg::ArrayBuffer> arrayBuffers;
     std::vector<nsk_cg::ElementBuffer> elementBuffers;
-    nsk_cg::VertexArray cubeVAO = LoadBuffers(cube, arrayBuffers, elementBuffers);
+    nsk_cg::VertexArray sphereVao = LoadBuffers(sphere, arrayBuffers, elementBuffers);
 
     const std::vector<nsk_cg::DrawData> objectsToDraw = {
-        nsk_cg::DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), firstCubeLocation), cube.GetIndices().size()),
-        nsk_cg::DrawData(&cubeVAO, glm::translate(glm::mat4(1.0f), secondCubeLocation), cube.GetIndices().size()),
+        nsk_cg::DrawData(&sphereVao, glm::translate(glm::mat4(1.0f), firstCubeLocation), sphere.GetIndices().size()),
+        nsk_cg::DrawData(&sphereVao, glm::translate(glm::mat4(1.0f), secondCubeLocation), sphere.GetIndices().size()),
     };
-    auto lightSource = nsk_cg::DrawData(&cubeVAO, glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)), light.position), cube.GetIndices().size());
+    auto lightSource = nsk_cg::DrawData(&sphereVao, glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)), light.position), sphere.GetIndices().size());
 
     glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -189,19 +119,8 @@ int main()
 
         const glm::mat4 viewMatrix = userContext.GetViewMatrix();
         ourShader.Use();
-        ourShader.SetVec3("material.ambient", cubeMaterial.ambient);
-        ourShader.SetVec3("material.diffuse", cubeMaterial.diffuse);
-        ourShader.SetVec3("material.specular", cubeMaterial.specular);
-        ourShader.SetFloat("material.shininess", cubeMaterial.shininess);
-
-        ourShader.SetInt("light.type", static_cast<int>(light.type));
-        ourShader.SetVec3("light.ambient", light.ambient);
-        ourShader.SetVec3("light.diffuse", light.diffuse); // darken diffuse light a bit
-        ourShader.SetVec3("light.specular", light.specular);
-        const glm::vec3 viewLightPosition = glm::vec3(viewMatrix * glm::vec4(light.position, 1.0f));
-        const glm::vec3 viewLightDirection = glm::vec3(viewMatrix * glm::vec4(light.direction, 0.0f));
-        ourShader.SetVec3("light.viewPosition", viewLightPosition);
-        ourShader.SetVec3("light.viewDirection", viewLightDirection);
+        SetMaterialToShader(cubeMaterial, ourShader);
+        SetLightSourceToShader(light, ourShader, viewMatrix);
         for (const auto& drawObject : objectsToDraw)
         {
             const glm::mat4 modelViewMatrix = viewMatrix * drawObject.placement;
