@@ -48,12 +48,13 @@ nsk_cg::VertexArray LoadBuffers(const nsk_cg::Mesh& object, std::vector<nsk_cg::
     return vao;
 }
 
-void SetMaterialToShader(const nsk_cg::Material& cubeMaterial, const nsk_cg::ShaderProgram& ourShader)
+void SetMaterialToShader(const nsk_cg::Material& material, const nsk_cg::ShaderProgram& ourShader)
 {
-    ourShader.SetVec3("material.ambient", cubeMaterial.ambient);
-    ourShader.SetVec3("material.diffuse", cubeMaterial.diffuse);
-    ourShader.SetVec3("material.specular", cubeMaterial.specular);
-    ourShader.SetFloat("material.shininess", cubeMaterial.shininess);
+    ourShader.SetVec3("material.ambient", material.ambient);
+    ourShader.SetVec3("material.diffuse", material.diffuse);
+    ourShader.SetVec3("material.specular", material.specular);
+    ourShader.SetFloat("material.shininess", material.shininess);
+    ourShader.SetFloat("material.opacity", material.opacity);
 }
 
 void SetLightSourceToShader(const nsk_cg::Light& light, const nsk_cg::ShaderProgram& ourShader, const glm::mat4& viewMatrix)

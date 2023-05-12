@@ -106,4 +106,22 @@ Mesh makeSphere(const int tesselationLevel)
 
     return {morphedVertices, tessResult.GetTriangles(), normals};
 }
+
+Mesh makeRectangle(float size)
+{
+    std::vector<Vertex> vertices = {
+    {-size, -size, 0.0f},
+    {size, -size, 0.0f},
+    {size, size, 0.0f},
+    {-size, size, 0.0f},
+    };
+    std::vector<IndexTriangle> indices = {
+        {0, 1, 2},
+        {0, 2, 3}
+    };
+
+    std::vector<glm::vec3> normals(4, { 0.0f, 0.0f, 1.0f });
+
+    return { vertices, indices, normals };
+}
 }

@@ -35,26 +35,32 @@ int main()
 #endif
 
     constexpr glm::vec3 backgroundColor(0.29f);
-    constexpr glm::vec3 firstCubeLocation(-2.0f, 0.0f, 0.0f);
-    constexpr glm::vec3 secondCubeLocation(2.0f, 0.0f, 0.0f);
-    const nsk_cg::Material cubeMaterial = { { 0.8f, 0.8f, 0.8f },
-        { 0.392f, 0.392f, 0.705f },
+    constexpr glm::vec3 cubeLocation(0.0f, 0.0f, 0.0f);
+    constexpr glm::vec3 rectangleLocation(1.0f, 1.0f, 1.0f);
+    const nsk_cg::Material cubeMaterial = { { 1.0f, 0.5f, 0.31f },
+        { 1.0f, 0.5f, 0.31f },
         { 0.5f, 0.5f, 0.5f },
-        50.0f
+        32.0f
     };
+    const nsk_cg::Material rectangleMaterial = { { 1.0f, 0.0f, 0.0f },
+    { 1.0f, 0.5f, 0.31f },
+    { 0.5f, 0.5f, 0.5f },
+    32.0f
+    };
+
     const nsk_cg::Light light = {
-        nsk_cg::LightType::Directional,
-    	{ 0.0f, 2.0f, 0.0f },
+        nsk_cg::LightType::Positional,
+    	{ 5.0f, 5.0f, 5.0f },
         {0.0f, -1.0f, 0.0f},
-        { 0.0f, 0.0f, 0.0f },
-        { 1.0f, 1.0f, 1.0f },
+        { 0.2f, 0.2f, 0.2f },
+        { 0.5f, 0.5f, 0.5f },
         { 1.0f, 1.0f, 1.0f },
     };
     constexpr glm::vec3 lookAt(0.0f);
     // HW_ITEM 3
     nsk_cg::UserContext userContext(lookAt, 10.0f);
 
-    GLFWwindow* window = glfwCreateWindow(userContext.GetScreenWidth(), userContext.GetScreenHeight(), "Problem 1",
+    GLFWwindow* window = glfwCreateWindow(userContext.GetScreenWidth(), userContext.GetScreenHeight(), "Transparency",
                                           nullptr, nullptr);
     if (window == nullptr)
     {
@@ -96,17 +102,19 @@ int main()
         return EXIT_FAILURE;
     }
 
-    const nsk_cg::Mesh sphere = nsk_cg::makeSphere(4);
+    const nsk_cg::Mesh cube = nsk_cg::makeCubeForLighting();
+    const nsk_cg::Mesh rectangle = nsk_cg::makeRectangle(1.0f);
 
     std::vector<nsk_cg::ArrayBuffer> arrayBuffers;
     std::vector<nsk_cg::ElementBuffer> elementBuffers;
-    nsk_cg::VertexArray sphereVao = LoadBuffers(sphere, arrayBuffers, elementBuffers);
+    nsk_cg::VertexArray cubeVao = LoadBuffers(cube, arrayBuffers, elementBuffers);
+    nsk_cg::VertexArray rectangleVao = LoadBuffers(rectangle, arrayBuffers, elementBuffers);
 
-    const std::vector<nsk_cg::DrawData> objectsToDraw = {
-        nsk_cg::DrawData(&sphereVao, glm::translate(glm::mat4(1.0f), firstCubeLocation), sphere.GetIndices().size()),
-        nsk_cg::DrawData(&sphereVao, glm::translate(glm::mat4(1.0f), secondCubeLocation), sphere.GetIndices().size()),
+    const std::vector<nsk_cg::ExtendedDrawData> objectsToDraw = {
+        nsk_cg::ExtendedDrawData(&cubeVao, cubeMaterial, glm::translate(glm::mat4(1.0f), cubeLocation), cube.GetIndices().size()),
+        nsk_cg::ExtendedDrawData(&rectangleVao, rectangleMaterial, glm::translate(glm::mat4(1.0f), rectangleLocation), rectangle.GetIndices().size())
     };
-    auto lightSource = nsk_cg::DrawData(&sphereVao, glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)), light.position), sphere.GetIndices().size());
+    auto lightSource = nsk_cg::DrawData(&cubeVao, glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)), light.position), cube.GetIndices().size());
 
     glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -119,7 +127,6 @@ int main()
 
         const glm::mat4 viewMatrix = userContext.GetViewMatrix();
         ourShader.Use();
-        SetMaterialToShader(cubeMaterial, ourShader);
         SetLightSourceToShader(light, ourShader, viewMatrix);
         for (const auto& drawObject : objectsToDraw)
         {
@@ -129,6 +136,7 @@ int main()
             ourShader.SetMat4("modelViewMatrix", modelViewMatrix);
             const glm::mat3 modelViewNormalMatrix = glm::mat3(glm::transpose(glm::inverse(modelViewMatrix)));
             ourShader.SetMat3("modelViewNormalMatrix", modelViewNormalMatrix);
+            SetMaterialToShader(drawObject.m_material, ourShader);
             drawObject.vao->drawElements(GL_TRIANGLES, drawObject.nVertices, GL_UNSIGNED_INT, nullptr);
         }
 

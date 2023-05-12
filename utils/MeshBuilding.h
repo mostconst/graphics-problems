@@ -7,4 +7,5 @@ namespace nsk_cg
 IndexedVertices makeCubeWithUniqueVertices();
 Mesh makeCubeForLighting();
 Mesh makeSphere(int tesselationLevel);
+Mesh makeRectangle(float size);
 }

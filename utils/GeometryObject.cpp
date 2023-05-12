@@ -2,6 +2,9 @@
 
 #include <cassert>
 
+#include "lighting_utils.h"
+#include "MeshBuilding.h"
+
 namespace nsk_cg
 {
 GeometryObject::GeometryObject(std::vector<Vertex> vertices, std::vector<utils::Color> colors,
@@ -62,20 +65,11 @@ GeometryObject makeRainbowCube()
     return { std::move(vertices), std::move(colors), std::move(indices) };
 }
 
-GeometryObject makePlatform(float size)
+GeometryObject makePlatform(const float size)
 {
-    std::vector<Vertex> vertices = {
-        {-size, -size, 0.0f},
-        {size, -size, 0.0f},
-        {size, size, 0.0f},
-        {-size, size, 0.0f},
-    };
+    const Mesh rectangleMesh = makeRectangle(size);
     std::vector<utils::Color> colors(4, { 0.5f, 0.5f, 0.5f });
-    std::vector<unsigned int> indices = {
-        0, 1, 2,
-        0, 2, 3,
-    };
 
-    return { std::move(vertices), std::move(colors), std::move(indices) };
+    return {rectangleMesh.GetVertices(), std::move(colors), rectangleMesh.GetIndices() };
 }
 }
