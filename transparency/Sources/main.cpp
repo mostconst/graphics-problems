@@ -151,6 +151,20 @@ std::vector<nsk_cg::Texture> makeColorTextures(const int layers, const int width
     return res;
 }
 
+void DrawLayers(const nsk_cg::ShaderProgram& screenQuadShader, const nsk_cg::VertexArray& screenQuadVao, const std::vector<nsk_cg::Texture>& colorTexture)
+{
+    glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    screenQuadShader.Use();
+    glActiveTexture(GL_TEXTURE0);
+    for (auto it = colorTexture.crbegin(); it != colorTexture.crend(); ++it)
+    {
+        glBindTexture(GL_TEXTURE_2D, it->GetRaw());	// use the color attachment texture as the texture of the quad plane
+        screenQuadVao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    }
+}
+
 int main()
 {
     glfwInit();
@@ -161,17 +175,14 @@ int main()
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 #endif
 
-    constexpr glm::vec3 backgroundColor(0.5f);
+    constexpr glm::vec3 backgroundColor(1.0f);
     constexpr glm::vec3 cubeLocation(0.0f, 0.0f, 0.0f);
-    const nsk_cg::Material cubeMaterial = { { 1.0f, 0.5f, 0.31f },
-        { 1.0f, 0.5f, 0.31f },
-        { 0.5f, 0.5f, 0.5f },
-        32.0f
-    };
+    const nsk_cg::Material cubeMaterial = makeTransparentMaterial({ 1.0f, 0.5f, 0.31f, 0.2f });
 
     std::vector<RectangleParameters> rectangles = {
         {{1.0f, 1.0f, 1.0f}, makeTransparentMaterial({0.0f, 1.0f, 0.0f, 0.5f})},
-        {{0.0f, 0.0f, 0.0f}, makeTransparentMaterial({0.0f, 0.0f, 1.0f, 0.5f})}
+        {{0.0f, 0.0f, 0.0f}, makeTransparentMaterial({0.0f, 0.0f, 1.0f, 0.5f})},
+        {{0.0f, 1.0f, 2.0f}, makeTransparentMaterial({1.0f, 0.0f, 0.0f, 0.5f})}
     };
 
     const nsk_cg::Light light = {
@@ -258,7 +269,7 @@ int main()
     glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, 1.0f);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    constexpr int nLayers = 2;
+    constexpr int nLayers = 3;
     std::vector<nsk_cg::Texture> colorTexture = makeColorTextures(nLayers, userContext.GetScreenWidth(),
                                                                   userContext.GetScreenHeight());
     const std::array<nsk_cg::Texture, 2> depthTexture = { makeTexture(GL_DEPTH_COMPONENT, userContext.GetScreenWidth(), userContext.GetScreenHeight()),
@@ -290,7 +301,7 @@ int main()
         glClear(GL_DEPTH_BUFFER_BIT);
         glClearDepth(1.0);
 
-        for (size_t i = 0; i < 2; i++)
+        for (int i = 0; i < nLayers; ++i)
         {
             makeFramebuffer(framebuffer, colorTexture[i], depthTexture[i % 2]);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -304,12 +315,7 @@ int main()
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
-        glDisable(GL_BLEND);
-        screenQuadShader.Use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, colorTexture[0].GetRaw());	// use the color attachment texture as the texture of the quad plane
-        screenQuadVao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        DrawLayers(screenQuadShader, screenQuadVao, colorTexture);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
