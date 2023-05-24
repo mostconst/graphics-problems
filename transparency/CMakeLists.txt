@@ -2,6 +2,10 @@ file(GLOB VENDORS_SOURCES ../external/glad/src/glad.c)
 file(GLOB PROJECT_HEADERS Headers/*.hpp)
 file(GLOB PROJECT_SOURCES
 Sources/main.cpp
+Sources/utils.h
+Sources/utils.cpp
+Sources/depth_peeling.h
+Sources/depth_peeling.cpp
 )
 file(GLOB PROJECT_SHADERS Shaders/*.comp
                           Shaders/*.frag

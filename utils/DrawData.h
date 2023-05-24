@@ -1,8 +1,12 @@
 ﻿#pragma once
+
+#include <glm/mat4x4.hpp>
+
 #include "Material.h"
 
 namespace nsk_cg
 {
+class VertexArray;
 class DrawData final
 {
 public:
@@ -21,7 +25,7 @@ public:
 class ExtendedDrawData final
 {
 public:
-    ExtendedDrawData(const VertexArray* const vao, const Material& material, const glm::mat4& placement, const size_t nVertices)
+    ExtendedDrawData(const VertexArray* vao, const Material& material, const glm::mat4& placement, const size_t nVertices)
         : vao(vao),
           m_material(material),
           placement(placement),

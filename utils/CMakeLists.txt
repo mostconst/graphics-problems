@@ -39,7 +39,13 @@ utils
  "Texture.h"
  "Texture.cpp"
  "Framebuffer.h"
- "Framebuffer.cpp")
+ "Framebuffer.cpp"
+ "buffer_loading.h"
+ "buffer_loading.cpp"
+ "glfw_utils.h"
+ "glfw_utils.cpp"
+ "ScreenSize.h"
+)
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
 	add_executable(

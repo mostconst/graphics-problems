@@ -4,6 +4,8 @@
 
 namespace nsk_cg
 {
+class Texture;
+
 class Framebuffer final
 {
 public:
@@ -16,6 +18,7 @@ public:
     Framebuffer& operator=(Framebuffer&& other) noexcept = default;
 
     void Bind() const;
+    void Attach(const Texture& textureColorBuffer, const Texture& textureDepthBuffer) const;
 
 private:
     MovableHandle handle;
