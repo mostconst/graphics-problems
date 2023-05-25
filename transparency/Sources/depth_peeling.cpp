@@ -28,14 +28,8 @@ void drawObject(const ShaderProgram& ourShader, const glm::mat4& viewMatrix, con
     drawObject.vao->drawElements(GL_TRIANGLES, drawObject.nVertices, GL_UNSIGNED_INT, nullptr);
 }
 
-Texture makeTexture(const int format, const int width, const int height) {
-    Texture textureColorBuffer;
-    glBindTexture(GL_TEXTURE_2D, textureColorBuffer.GetRaw());
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
+Texture makeTexture(const TextureFormat& format, const int width, const int height) {
+    Texture textureColorBuffer(format, width, height);
     return textureColorBuffer;
 }
 
@@ -44,46 +38,57 @@ Texture makeTexture(const int format, const int width, const int height) {
 std::vector<Texture> makeColorTextures(const int layers, const int width, const int height)
 {
     assert(layers > 0);
-    assert(width > 0);
-    assert(height > 0);
 
     std::vector<Texture> res;
     for(int i = 0; i < layers; ++i)
     {
-        res.push_back(makeTexture(GL_RGBA, width, height));
+        res.push_back(makeTexture(TextureFormat::Color, width, height));
     }
 
     return res;
 }
 
 void drawLayers(const ShaderProgram& screenQuadShader, const VertexArray& screenQuadVao,
-                const std::vector<Texture>& colorTexture)
+                const std::vector<Texture>& colorTextures, const Texture& opaqueLayer)
 {
-    glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     screenQuadShader.Use();
     glActiveTexture(GL_TEXTURE0);
-    for (auto it = colorTexture.crbegin(); it != colorTexture.crend(); ++it)
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // TODO remove?
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for (auto it = colorTextures.crbegin(); it != colorTextures.crend(); ++it)
     {
         glBindTexture(GL_TEXTURE_2D, it->GetRaw()); // use the color attachment texture as the texture of the quad plane
         screenQuadVao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     }
+    glDisable(GL_BLEND);
 }
 
 DepthPeelingResources::DepthPeelingResources(const ScreenSize& screenSize, const int nLayers)
+    : m_opaqueColor(TextureFormat::Color, screenSize.m_width, screenSize.m_height),
+      m_opaqueDepth(TextureFormat::Depth, screenSize.m_width, screenSize.m_height),
+      m_colorTextures(nsk_cg::makeColorTextures(
+          nLayers, screenSize.m_width, screenSize.m_height)),
+      m_depthTextures{
+          nsk_cg::makeTexture(TextureFormat::Depth, screenSize.m_width, screenSize.m_height),
+          nsk_cg::makeTexture(TextureFormat::Depth, screenSize.m_width, screenSize.m_height)
+      }
 {
-    assert(nLayers > 0);
-
-    m_colorTextures = nsk_cg::makeColorTextures(
-        nLayers, screenSize.m_width, screenSize.m_height);
-    m_depthTextures = {
-        nsk_cg::makeTexture(GL_DEPTH_COMPONENT, screenSize.m_width, screenSize.m_height),
-        nsk_cg::makeTexture(GL_DEPTH_COMPONENT, screenSize.m_width, screenSize.m_height)
-    };
 }
 
-const std::vector<Texture>& DepthPeelingResources::GetColorTextures() const
+const Texture& DepthPeelingResources::GetOpaqueColor() const
+{
+    return m_opaqueColor;
+}
+
+const Texture& DepthPeelingResources::GetOpaqueDepth() const
+{
+    return m_opaqueDepth;
+}
+
+const std::vector<Texture>& DepthPeelingResources::GetTransparencyTextures() const
 {
     return m_colorTextures;
 }
@@ -93,8 +98,18 @@ const std::array<Texture, 2>& DepthPeelingResources::GetDepthTextures() const
     return m_depthTextures;
 }
 
-void DepthPeelingResources::OnWindowSizeChange(int width, int height)
+void DepthPeelingResources::OnWindowSizeChange(const ScreenSize& size)
 {
+    m_opaqueColor.SetSize(size);
+    m_opaqueDepth.SetSize(size);
 
+    for (auto& colorTexture : m_colorTextures)
+    {
+        colorTexture.SetSize(size);
+    }
+    for (auto& depthTexture : m_depthTextures)
+    {
+        depthTexture.SetSize(size);
+    }
 }
 }

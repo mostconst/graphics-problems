@@ -13,8 +13,8 @@ namespace nsk_cg
     public:
         SceneObjects(std::vector<ExtendedDrawData> opaqueObjects,
             std::vector<ExtendedDrawData> transparentObjects);
-        const std::vector<ExtendedDrawData>& OpaqueObjects() const;
-        const std::vector<ExtendedDrawData>& TransparentObjects() const;
+        const std::vector<ExtendedDrawData>& GetOpaqueObjects() const;
+        const std::vector<ExtendedDrawData>& GetTransparentObjects() const;
     private:
         const std::vector<ExtendedDrawData> opaqueObjects;
         const std::vector<ExtendedDrawData> transparentObjects;

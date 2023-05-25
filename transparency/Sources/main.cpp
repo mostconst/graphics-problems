@@ -86,46 +86,43 @@ int main()
     {
         nsk_cg::processInput(window);
 
-        glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, 1.0f);
-        glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         const glm::mat4 viewMatrix = userContext.GetViewMatrix();
         ourShader.Use();
         setLightSourceToShader(light, ourShader, viewMatrix);
-        const glm::mat4 projectionMatrix = userContext.GetProjection();
 
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.GetRaw());
-        framebuffer.Bind();
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //for (const auto& object : opaqueObjects)
-        //{
-        //    drawObject(ourShader, viewMatrix, projectionMatrix, object);
-        //}
-        const std::vector<nsk_cg::Texture>& colorTextures = depthPeelingResources.GetColorTextures();
+        glEnable(GL_DEPTH_TEST);
+
+        const std::vector<nsk_cg::Texture>& transparentLayers = depthPeelingResources.GetTransparencyTextures();
         const auto& depthTextures = depthPeelingResources.GetDepthTextures();
-        framebuffer.Attach(colorTextures[0], depthTextures[1]);
+        framebuffer.Attach(transparentLayers[0], depthTextures[1]);
         glClearDepth(0.0);
         glClear(GL_DEPTH_BUFFER_BIT);
         glClearDepth(1.0);
 
         for (int i = 0; i < nLayers; ++i)
         {
-            framebuffer.Attach(colorTextures[i], depthTextures[i % 2]);
+            framebuffer.Attach(transparentLayers[i], depthTextures[i % 2]);
             framebuffer.Bind();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, depthTextures[(i + 1) % 2].GetRaw());
-            for (const auto& object : sceneObjects.TransparentObjects())
+
+            for (const auto& object : sceneObjects.GetOpaqueObjects())
             {
+                const glm::mat4 projectionMatrix = userContext.GetProjection();
+                drawObject(ourShader, viewMatrix, projectionMatrix, object);
+            }
+            for (const auto& object : sceneObjects.GetTransparentObjects())
+            {
+                const glm::mat4 projectionMatrix = userContext.GetProjection();
                 drawObject(ourShader, viewMatrix, projectionMatrix, object);
             }
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
 
-        drawLayers(screenQuadShader, screenQuadVao, colorTextures);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        drawLayers(screenQuadShader, screenQuadVao, transparentLayers, depthPeelingResources.GetOpaqueColor());
 
         glfwSwapBuffers(window);
         glfwPollEvents();

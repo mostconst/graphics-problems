@@ -29,7 +29,7 @@ struct RectangleParameters
     const Material material;
 };
 
-const std::vector<ExtendedDrawData>& SceneObjects::OpaqueObjects() const
+const std::vector<ExtendedDrawData>& SceneObjects::GetOpaqueObjects() const
 {
     return opaqueObjects;
 }
@@ -41,7 +41,7 @@ SceneObjects::SceneObjects(std::vector<ExtendedDrawData> opaqueObjects,
 {
 }
 
-const std::vector<ExtendedDrawData>& SceneObjects::TransparentObjects() const
+const std::vector<ExtendedDrawData>& SceneObjects::GetTransparentObjects() const
 {
     return transparentObjects;
 }
@@ -61,14 +61,15 @@ SceneObjects prepareScene(std::vector<ArrayBuffer>& arrayBuffers, std::vector<El
     const Material cubeMaterial = makeTransparentMaterial({1.0f, 0.5f, 0.31f, 0.2f});
 
     std::vector<RectangleParameters> rectangles = {
-        {{1.0f, 1.0f, 1.0f}, makeTransparentMaterial({0.0f, 1.0f, 0.0f, 0.5f})},
+        //{{1.0f, 1.0f, 1.0f}, makeTransparentMaterial({0.0f, 1.0f, 0.0f, 0.5f})},
         {{0.0f, 0.0f, 0.0f}, makeTransparentMaterial({0.0f, 0.0f, 1.0f, 0.5f})},
         {{0.0f, 1.0f, 2.0f}, makeTransparentMaterial({1.0f, 0.0f, 0.0f, 0.5f})}
     };
 
     std::vector<ExtendedDrawData> opaqueObjects = {
-        ExtendedDrawData(&cubeVao, cubeMaterial, translate(glm::mat4(1.0f), cubeLocation),
-                         cube.GetIndices().size())
+        ExtendedDrawData(&rectangleVao, makeTransparentMaterial({0.0f, 1.0f, 0.0f, 1.0f}),
+                                         translate(glm::mat4(1.0f), {1.0f, 1.0f, 1.0f}),
+                                         rectangleMesh.GetIndices().size())
     };
 
     std::vector<ExtendedDrawData> transparentObjects;

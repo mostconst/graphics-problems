@@ -2,11 +2,13 @@
 
 namespace nsk_cg
 {
+struct ScreenSize;
+
 class IScreenSizeListener
 {
 public:
     virtual ~IScreenSizeListener() = default;
 
-    virtual void OnWindowSizeChange(int width, int height) = 0;
+    virtual void OnWindowSizeChange(const ScreenSize& size) = 0;
 };
 }

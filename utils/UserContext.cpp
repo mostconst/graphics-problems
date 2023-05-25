@@ -1,6 +1,8 @@
 ﻿#include "UserContext.h"
 
-#include "glad/glad.h"
+#include <glad/glad.h>
+
+#include "ScreenSize.h"
 
 namespace nsk_cg
 {
@@ -53,7 +55,7 @@ void UserContext::OnWindowSizeChange(const int width, const int height)
 
     for(const auto listener : m_screenSizeListeners)
     {
-        listener->OnWindowSizeChange(width, height);
+        listener->OnWindowSizeChange({width, height});
     }
 }
 

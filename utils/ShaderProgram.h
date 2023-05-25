@@ -22,7 +22,7 @@ public:
     static void SetVec3(int location, const glm::vec3& vector);
     void SetMat3(const std::string& name, const glm::mat3& matrix) const;
     void SetInt(const std::string& name, int value) const;
-    static void SetInt(int location, int value);
+    void SetBool(const std::string& name, bool value) const;
 
 private:
     ShaderProgramGuard guard;
