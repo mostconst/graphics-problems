@@ -95,9 +95,8 @@ int main()
         const std::vector<nsk_cg::Texture>& transparentLayers = depthPeelingResources.GetTransparencyTextures();
         const auto& depthTextures = depthPeelingResources.GetDepthTextures();
         framebuffer.Attach(transparentLayers[0], depthTextures[1]);
-        glClearDepth(0.0);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glClearDepth(1.0);
+        constexpr float clearVal = 0.0f;
+        glClearBufferfv(GL_DEPTH, 0, &clearVal);
 
         for (int i = 0; i < nLayers; ++i)
         {
@@ -122,7 +121,7 @@ int main()
         glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        drawLayers(screenQuadShader, screenQuadVao, transparentLayers, depthPeelingResources.GetOpaqueColor());
+        drawLayers(screenQuadShader, screenQuadVao, transparentLayers);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

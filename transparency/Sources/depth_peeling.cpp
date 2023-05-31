@@ -42,14 +42,14 @@ std::vector<Texture> makeColorTextures(const int layers, const int width, const 
     std::vector<Texture> res;
     for(int i = 0; i < layers; ++i)
     {
-        res.push_back(makeTexture(TextureFormat::Color, width, height));
+        res.emplace_back(TextureFormat::Color, width, height);
     }
 
     return res;
 }
 
 void drawLayers(const ShaderProgram& screenQuadShader, const VertexArray& screenQuadVao,
-                const std::vector<Texture>& colorTextures, const Texture& opaqueLayer)
+                const std::vector<Texture>& colorTextures)
 {
     screenQuadShader.Use();
     glActiveTexture(GL_TEXTURE0);
@@ -67,25 +67,13 @@ void drawLayers(const ShaderProgram& screenQuadShader, const VertexArray& screen
 }
 
 DepthPeelingResources::DepthPeelingResources(const ScreenSize& screenSize, const int nLayers)
-    : m_opaqueColor(TextureFormat::Color, screenSize.m_width, screenSize.m_height),
-      m_opaqueDepth(TextureFormat::Depth, screenSize.m_width, screenSize.m_height),
-      m_colorTextures(nsk_cg::makeColorTextures(
+    : m_colorTextures(nsk_cg::makeColorTextures(
           nLayers, screenSize.m_width, screenSize.m_height)),
       m_depthTextures{
           nsk_cg::makeTexture(TextureFormat::Depth, screenSize.m_width, screenSize.m_height),
           nsk_cg::makeTexture(TextureFormat::Depth, screenSize.m_width, screenSize.m_height)
       }
 {
-}
-
-const Texture& DepthPeelingResources::GetOpaqueColor() const
-{
-    return m_opaqueColor;
-}
-
-const Texture& DepthPeelingResources::GetOpaqueDepth() const
-{
-    return m_opaqueDepth;
 }
 
 const std::vector<Texture>& DepthPeelingResources::GetTransparencyTextures() const
@@ -100,9 +88,6 @@ const std::array<Texture, 2>& DepthPeelingResources::GetDepthTextures() const
 
 void DepthPeelingResources::OnWindowSizeChange(const ScreenSize& size)
 {
-    m_opaqueColor.SetSize(size);
-    m_opaqueDepth.SetSize(size);
-
     for (auto& colorTexture : m_colorTextures)
     {
         colorTexture.SetSize(size);

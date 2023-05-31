@@ -21,22 +21,18 @@ void drawObject(const ShaderProgram& ourShader, const glm::mat4& viewMatrix, con
 Texture makeTexture(const TextureFormat& format, const int width, const int height);
 std::vector<Texture> makeColorTextures(const int layers, const int width, const int height);
 void drawLayers(const ShaderProgram& screenQuadShader, const VertexArray& screenQuadVao,
-                const std::vector<Texture>& colorTextures, const Texture& opaqueLayer);
+                const std::vector<Texture>& colorTextures);
 
 class DepthPeelingResources final : public IScreenSizeListener
 {
 public:
     explicit DepthPeelingResources(const ScreenSize& screenSize, int nLayers);
 
-    const Texture& GetOpaqueColor() const;
-    const Texture& GetOpaqueDepth() const;
     const std::vector<Texture>& GetTransparencyTextures() const;
     const std::array<Texture, 2>& GetDepthTextures() const;
     void OnWindowSizeChange(const ScreenSize& size) override;
 
 private:
-    Texture m_opaqueColor;
-    Texture m_opaqueDepth;
     const std::vector<Texture> m_colorTextures;
     const std::array<Texture, 2> m_depthTextures;
 };
