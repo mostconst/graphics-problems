@@ -33,7 +33,19 @@ utils
 "Mesh.cpp"
 "Material.h"
 "Light.h"
- "lighting_utils.h" "lighting_utils.cpp")
+ "lighting_utils.h"
+ "lighting_utils.cpp"
+ "constants.h"
+ "Texture.h"
+ "Texture.cpp"
+ "Framebuffer.h"
+ "Framebuffer.cpp"
+ "buffer_loading.h"
+ "buffer_loading.cpp"
+ "glfw_utils.h"
+ "glfw_utils.cpp"
+ "ScreenSize.h"
+)
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
 	add_executable(

@@ -11,6 +11,7 @@
 #include "ShaderProgram.h"
 #include "gldebug.h"
 #include "ArrayBuffer.h"
+#include "buffer_loading.h"
 #include "VertexArray.h"
 #include "DrawData.h"
 #include "MeshBuilding.h"
@@ -37,7 +38,7 @@ int main()
     constexpr glm::vec3 backgroundColor(0.29f);
     constexpr glm::vec3 firstCubeLocation(-2.0f, 0.0f, 0.0f);
     constexpr glm::vec3 secondCubeLocation(2.0f, 0.0f, 0.0f);
-    constexpr nsk_cg::Material cubeMaterial = { { 0.8f, 0.8f, 0.8f },
+    const nsk_cg::Material cubeMaterial = { { 0.8f, 0.8f, 0.8f },
         { 0.392f, 0.392f, 0.705f },
         { 0.5f, 0.5f, 0.5f },
         50.0f
@@ -100,7 +101,7 @@ int main()
 
     std::vector<nsk_cg::ArrayBuffer> arrayBuffers;
     std::vector<nsk_cg::ElementBuffer> elementBuffers;
-    nsk_cg::VertexArray sphereVao = LoadBuffers(sphere, arrayBuffers, elementBuffers);
+    nsk_cg::VertexArray sphereVao = loadBuffers(sphere, arrayBuffers, elementBuffers);
 
     const std::vector<nsk_cg::DrawData> objectsToDraw = {
         nsk_cg::DrawData(&sphereVao, glm::translate(glm::mat4(1.0f), firstCubeLocation), sphere.GetIndices().size()),
@@ -119,8 +120,8 @@ int main()
 
         const glm::mat4 viewMatrix = userContext.GetViewMatrix();
         ourShader.Use();
-        SetMaterialToShader(cubeMaterial, ourShader);
-        SetLightSourceToShader(light, ourShader, viewMatrix);
+        setMaterialToShader(cubeMaterial, ourShader);
+        setLightSourceToShader(light, ourShader, viewMatrix);
         for (const auto& drawObject : objectsToDraw)
         {
             const glm::mat4 modelViewMatrix = viewMatrix * drawObject.placement;

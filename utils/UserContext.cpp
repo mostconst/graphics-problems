@@ -1,12 +1,19 @@
 ﻿#include "UserContext.h"
 
-#include "glad/glad.h"
+#include <glad/glad.h>
+
+#include "ScreenSize.h"
 
 namespace nsk_cg
 {
 UserContext::UserContext(const glm::vec3& lookAt, const float cameraDistance)
-    : camera{ cameraDistance, lookAt }
+    : m_camera{ cameraDistance, lookAt }
 {
+}
+
+void UserContext::AddScreenSizeListener(IScreenSizeListener* const listener)
+{
+    m_screenSizeListeners.push_back(listener);
 }
 
 int UserContext::GetScreenWidth() const
@@ -26,39 +33,44 @@ double UserContext::GetCameraSensitivity() const
 
 const Camera& UserContext::GetCamera() const
 {
-    return camera;
+    return m_camera;
 }
 
 const glm::mat4& UserContext::GetProjection() const
 {
-    return projection;
+    return m_projection;
 }
 
 glm::mat4 UserContext::GetViewMatrix() const
 {
-    return camera.GetViewMatrix();
+    return m_camera.GetViewMatrix();
 }
 
 void UserContext::OnWindowSizeChange(const int width, const int height)
 {
     glViewport(0, 0, width, height);
-    projection = math_utils::perspectiveFov(glm::radians(fovDeg),
+    m_projection = math_utils::perspectiveFov(glm::radians(fovDeg),
         static_cast<float>(width) / static_cast<float>(height), zNear,
         zFar);
+
+    for(const auto listener : m_screenSizeListeners)
+    {
+        listener->OnWindowSizeChange({width, height});
+    }
 }
 
 void UserContext::OnMouseMove(double screenX, double screenY)
 {
-    if (buttonPressed)
+    if (m_buttonPressed)
     {
-        camera.RotateHorizontal(static_cast<float>((screenY - lastCursorPos.second) / -cameraSensitivity));
-        camera.RotateVertical(static_cast<float>((screenX - lastCursorPos.first) / -cameraSensitivity));
+        m_camera.RotateHorizontal(static_cast<float>((screenY - lastCursorPos.second) / -cameraSensitivity));
+        m_camera.RotateVertical(static_cast<float>((screenX - lastCursorPos.first) / -cameraSensitivity));
     }
     lastCursorPos = { screenX, screenY };
 }
 
 void UserContext::OnLeftMouseButtonAction(const bool pressed)
 {
-    buttonPressed = pressed;
+    m_buttonPressed = pressed;
 }
 }
