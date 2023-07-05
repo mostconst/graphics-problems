@@ -2,14 +2,13 @@
 #include "MovableHandle.h"
 #include "glad/glad.h"
 
-enum class TextureFormat
+namespace nsk_cg
 {
+enum class TextureFormat {
     Color = GL_RGBA,
     Depth = GL_DEPTH_COMPONENT
 };
 
-namespace nsk_cg
-{
 struct ScreenSize;
 
 class Texture final
