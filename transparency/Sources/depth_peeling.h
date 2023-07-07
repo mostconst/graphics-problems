@@ -14,7 +14,7 @@ class VertexArray;
 class Framebuffer;
 class ExtendedDrawData;
 class ShaderProgram;
-struct ScreenSize;
+class ScreenSize;
 
 void drawObject(const ShaderProgram& ourShader, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix,
                 const std::vector<ExtendedDrawData>::value_type& drawObject);
@@ -33,7 +33,7 @@ public:
     void OnWindowSizeChange(const ScreenSize& size) override;
 
 private:
-    const std::vector<Texture> m_colorTextures;
-    const std::array<Texture, 2> m_depthTextures;
+    std::vector<Texture> m_colorTextures;
+    std::array<Texture, 2> m_depthTextures;
 };
 }

@@ -14,7 +14,8 @@ unsigned int createTexture()
 
 Texture::Texture(const TextureFormat& type, const int width, const int height)
     : handle(createTexture()),
-      m_type(type)
+      m_type(type),
+      m_size{width, height}
 {
     glBindTexture(GL_TEXTURE_2D, GetRaw());
     glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(type), width, height, 0, static_cast<int>(type), GL_UNSIGNED_BYTE, nullptr);
@@ -28,9 +29,20 @@ Texture::~Texture()
     glDeleteTextures(1, &handle.GetRaw());
 }
 
-void Texture::SetSize(const ScreenSize& size) const
+void Texture::SetSize(const ScreenSize& size)
+{
+    m_size = size;
+    glBindTexture(GL_TEXTURE_2D, GetRaw());
+    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(m_type), size.GetWidth(), size.GetHeight(), 0, static_cast<int>(m_type), GL_UNSIGNED_BYTE, nullptr);
+}
+
+
+Image Texture::MakeImage() const
 {
     glBindTexture(GL_TEXTURE_2D, GetRaw());
-    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(m_type), size.m_width, size.m_height, 0, static_cast<int>(m_type), GL_UNSIGNED_BYTE, nullptr);
+    const int nComponents = 4;
+    std::vector<unsigned char> buffer(static_cast<size_t>(m_size.GetWidth() * m_size.GetHeight() * nComponents), 0);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
+    return Image{ std::move(buffer), m_size, nComponents };
 }
 }

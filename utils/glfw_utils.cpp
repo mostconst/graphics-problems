@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "ScreenSize.h"
 #include "UserContext.h"
 
 namespace nsk_cg
@@ -64,6 +65,36 @@ GLFWwindow* makeWindow(nsk_cg::UserContext& userContext, const std::string_view&
     glfwSetCursorPosCallback(window, nsk_cg::mouse_callback);
     glfwSetMouseButtonCallback(window, nsk_cg::mouse_button_callback);
     glfwSetWindowUserPointer(window, &userContext);
+
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return nullptr;
+    }
+
+    return window;
+}
+
+
+GLFWwindow* makeMinimalWindow(const ScreenSize& userContext, const std::string_view& title)
+{
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifndef NDEBUG
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+#endif
+
+    GLFWwindow* const window = glfwCreateWindow(userContext.GetWidth(), userContext.GetHeight(), title.data(),
+        nullptr, nullptr);
+    if (window == nullptr)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return nullptr;
+    }
+    glfwMakeContextCurrent(window);
 
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {

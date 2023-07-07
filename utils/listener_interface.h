@@ -2,7 +2,7 @@
 
 namespace nsk_cg
 {
-struct ScreenSize;
+class ScreenSize;
 
 class IScreenSizeListener
 {

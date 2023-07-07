@@ -5,23 +5,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/string_cast.hpp>
-
-#include "ShaderProgram.h"
-#include "gldebug.h"
-#include "ArrayBuffer.h"
-#include "VertexArray.h"
-#include "DrawData.h"
-#include "GeometryObject.h"
 #include "UserContext.h"
 #include "Texture.h"
 #include "Framebuffer.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "glfw_utils.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -30,50 +18,17 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 int main()
 {
-    int width, height, channels;
-    unsigned char *img = stbi_load("D:\\pic.png", &width, &height, &channels, 0);
-    std::cout << "Loaded image " << width << "x" << height << " with " << channels << " channels\n";
-    //stbi_write_png("D:\\pic2.png", width, height, channels, img, width * channels);
-    stbi_image_free(img);
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifndef NDEBUG
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-#endif
-
     constexpr int windowWidth = 800;
     constexpr int windowHeight = 600;
-    GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Problem 1",
-                                          nullptr, nullptr);
-    if (window == nullptr)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return EXIT_FAILURE;
-    }
-    glfwMakeContextCurrent(window);
-    // glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    // glfwSetCursorPosCallback(window, mouse_callback);
-    // glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-#ifndef NDEBUG
-    nsk_cg::enableDebugOutput();
-#endif
+    const auto window = nsk_cg::makeMinimalWindow({ windowWidth, windowHeight }, "Save image");
 
     // HW_ITEM 9
     glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 
-    nsk_cg::Texture colorTexture(TextureFormat::Color, windowWidth, windowHeight);
-    nsk_cg::Texture depthTexture(TextureFormat::Depth, windowWidth, windowHeight);
+    nsk_cg::Texture colorTexture(nsk_cg::TextureFormat::Color, windowWidth, windowHeight);
+    nsk_cg::Texture depthTexture(nsk_cg::TextureFormat::Depth, windowWidth, windowHeight);
     nsk_cg::Framebuffer framebuffer;
     framebuffer.Attach(colorTexture, depthTexture);
     while (!glfwWindowShouldClose(window))
@@ -86,10 +41,8 @@ int main()
         glfwPollEvents();
     }
 
-    glBindTexture(GL_TEXTURE_2D, colorTexture.GetRaw());
-    std::vector<unsigned char> buffer(windowWidth * windowHeight * 4, 0);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
-    stbi_write_png("D:\\pic2.png", windowWidth, windowHeight, 4, buffer.data(), windowWidth * 4);
+    nsk_cg::Image image = colorTexture.MakeImage();
+    nsk_cg::saveImage(image, "D:\\saved_picture.png");
 
     glfwTerminate();
     return EXIT_SUCCESS;

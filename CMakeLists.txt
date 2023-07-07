@@ -29,14 +29,12 @@ include_directories(SYSTEM Glitter/Headers/
                     external/learnopengl/
 					utils)
 
+enable_testing()
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
     add_subdirectory(external/googletest)
 	# For Windows: Prevent overriding the parent project's compiler/linker settings
 	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 endif()
-
-enable_testing()
-
 add_subdirectory(utils)
 add_subdirectory(problem1)
 add_subdirectory(problem2)
