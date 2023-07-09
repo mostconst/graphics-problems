@@ -31,4 +31,15 @@ inline int ScreenSize::GetHeight() const
 {
     return m_height;
 }
+
+inline bool operator==(const ScreenSize& lhs, const ScreenSize& rhs)
+{
+    return lhs.GetWidth() == rhs.GetWidth()
+        && lhs.GetHeight() == rhs.GetHeight();
+}
+
+inline bool operator!=(const ScreenSize& lhs, const ScreenSize& rhs)
+{
+    return !(lhs == rhs);
+}
 }

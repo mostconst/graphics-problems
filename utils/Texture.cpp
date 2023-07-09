@@ -1,5 +1,7 @@
 #include "Texture.h"
 
+#include <cassert>
+
 #include "ScreenSize.h"
 #include "glad/glad.h"
 
@@ -10,6 +12,20 @@ unsigned int createTexture()
     unsigned int res;
     glGenTextures(1, &res);
     return res;
+}
+
+int textureFormatSize(const TextureFormat format)
+{
+	switch (format)
+	{
+		case TextureFormat::Color:
+            return 4;
+		case TextureFormat::Depth:
+	        return 1;
+	}
+    assert(false);
+
+    return 0;
 }
 
 Texture::Texture(const TextureFormat& type, const int width, const int height)
@@ -37,12 +53,12 @@ void Texture::SetSize(const ScreenSize& size)
 }
 
 
-Image Texture::MakeImage() const
+std::vector<unsigned char> Texture::GetData() const
 {
     glBindTexture(GL_TEXTURE_2D, GetRaw());
-    const int nComponents = 4;
-    std::vector<unsigned char> buffer(static_cast<size_t>(m_size.GetWidth() * m_size.GetHeight() * nComponents), 0);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
-    return Image{ std::move(buffer), m_size, nComponents };
+    const int nComponents = textureFormatSize(m_type);
+    std::vector<unsigned char> buffer(static_cast<size_t>(imagePixelCount(m_size, nComponents)), 0);
+    glGetTexImage(GL_TEXTURE_2D, 0, static_cast<int>(m_type), GL_UNSIGNED_BYTE, buffer.data());
+    return buffer;
 }
 }

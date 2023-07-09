@@ -1,4 +1,7 @@
 #pragma once
+
+#include <vector>
+
 #include "Image.h"
 #include "MovableHandle.h"
 #include "ScreenSize.h"
@@ -10,6 +13,8 @@ enum class TextureFormat {
     Color = GL_RGBA,
     Depth = GL_DEPTH_COMPONENT
 };
+
+int textureFormatSize(TextureFormat format);
 
 class Texture final
 {
@@ -23,7 +28,11 @@ public:
 
     unsigned GetRaw() const { return handle.GetRaw(); }
     void SetSize(const ScreenSize& size);
-    Image MakeImage() const;
+    const ScreenSize& GetSize() const { return m_size; }
+
+    TextureFormat GetType() const { return m_type; }
+
+    std::vector<unsigned char> GetData() const;
 
 private:
     MovableHandle handle;

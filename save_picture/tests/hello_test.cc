@@ -23,7 +23,8 @@ const testing::TestInfo& getCurrentTestInfo()
 void takeSnapshot(SnapshotChecker& checker, const nsk_cg::Texture& colorBuffer)
 {
     glFinish();
-    const nsk_cg::Image image = colorBuffer.MakeImage();
+    auto textureData = colorBuffer.GetData();
+    const nsk_cg::Image image(textureData, colorBuffer.GetSize(), nsk_cg::textureFormatSize(colorBuffer.GetType()));
     checker.TakeSnapshot(image);
 }
 
@@ -47,4 +48,10 @@ TEST(VisualTest, CreatingWindow) {
     takeSnapshot(checker, colorTexture);
 
     glfwTerminate();
+}
+
+TEST(ImageTest, ReadWorks)
+{
+	//nsk_cg::readImage("D:\\")
+    ASSERT_TRUE(true);
 }

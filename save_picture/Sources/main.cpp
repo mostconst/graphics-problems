@@ -41,9 +41,6 @@ int main()
         glfwPollEvents();
     }
 
-    nsk_cg::Image image = colorTexture.MakeImage();
-    nsk_cg::saveImage(image, "D:\\saved_picture.png");
-
     glfwTerminate();
     return EXIT_SUCCESS;
 }
