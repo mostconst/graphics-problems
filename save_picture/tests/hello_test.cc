@@ -20,7 +20,24 @@ const testing::TestInfo& getCurrentTestInfo()
     return *testInfo;
 }
 
-void takeSnapshot(SnapshotChecker& checker, const nsk_cg::Texture& colorBuffer)
+class TestDriver
+{
+public:
+    TestDriver(const std::string& testSuiteName, const std::string& testName)
+        : m_testSuiteName(testSuiteName),
+          m_testName(testName)
+    {
+    }
+    void TakeSnapshot(const nsk_cg::Image& image);
+
+private:
+    SnapshotChecker m_checker{ "D:\\temp\\references",  "D:\\temp\\output" };
+    std::string m_testSuiteName;
+    std::string m_testName;
+    int m_snapshotCounter = 0;
+};
+
+void takeSnapshot(TestDriver& checker, const nsk_cg::Texture& colorBuffer)
 {
     glFinish();
     auto textureData = colorBuffer.GetData();
@@ -33,7 +50,7 @@ TEST(VisualTest, CreatingWindow) {
     int windowWidth = 800;
     int windowHeight = 600;
     const auto& testInfo = getCurrentTestInfo();
-    SnapshotChecker checker(testInfo.test_suite_name(), testInfo.name());
+    TestDriver checker(testInfo.test_suite_name(), testInfo.name());
     const auto window = nsk_cg::makeMinimalWindow({ windowWidth, windowHeight }, "TestWindow");
     EXPECT_TRUE(window != nullptr);
     glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
