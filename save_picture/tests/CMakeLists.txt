@@ -1,13 +1,12 @@
 add_executable(
   hello_test
   hello_test.cc
-  SnapshotChecker.h
-  SnapshotChecker.cpp
   ${VENDORS_SOURCES}
 )
 target_link_libraries(
   hello_test
   glfw
+  testing_tool
   ${GLFW_LIBRARIES}
   ${GLAD_LIBRARIES}
   utils

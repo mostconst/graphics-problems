@@ -7,9 +7,9 @@
 #include "stb_image.h"
 
 
-namespace nsk_cg
+namespace testing_tool
 {
-Image::Image(std::vector<unsigned char> buffer, const ScreenSize& size, const int nComponents)
+Image::Image(std::vector<unsigned char> buffer, const ImageDimensions& size, const int nComponents)
     : m_buffer(std::move(buffer)),
     m_size(size),
     m_nComponents(nComponents)
@@ -17,7 +17,7 @@ Image::Image(std::vector<unsigned char> buffer, const ScreenSize& size, const in
     assert(m_buffer.size() == imagePixelCount(m_size, m_nComponents));
 }
 
-Image::Image(const unsigned char* buffer, const ScreenSize& size, const int nComponents)
+Image::Image(const unsigned char* buffer, const ImageDimensions& size, const int nComponents)
     : m_buffer(buffer, buffer + imagePixelCount(size, nComponents)),
       m_size(size),
       m_nComponents(nComponents)
@@ -31,7 +31,7 @@ const std::vector<unsigned char>& Image::GetBuffer() const
 }
 
 
-ScreenSize Image::GetSize() const
+ImageDimensions Image::GetSize() const
 {
     return m_size;
 }
@@ -48,7 +48,7 @@ bool equalExactly(const Image& first, const Image& second)
     return first.GetSize() == second.GetSize() && first.GetBuffer() == second.GetBuffer();
 }
 
-int imagePixelCount(const ScreenSize& size, const int nComponents)
+int imagePixelCount(const ImageDimensions& size, const int nComponents)
 {
     assert(nComponents > 0);
     return size.GetWidth() * size.GetHeight() * nComponents;

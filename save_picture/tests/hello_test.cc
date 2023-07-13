@@ -3,8 +3,9 @@
 
 #include "Framebuffer.h"
 #include "glfw_utils.h"
-#include "ScreenSize.h"
+#include "ImageDimensions.h"
 #include "Texture.h"
+#include "Image.h"
 #include "SnapshotChecker.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -20,29 +21,12 @@ const testing::TestInfo& getCurrentTestInfo()
     return *testInfo;
 }
 
-class TestDriver
-{
-public:
-    TestDriver(const std::string& testSuiteName, const std::string& testName)
-        : m_testSuiteName(testSuiteName),
-          m_testName(testName)
-    {
-    }
-    void TakeSnapshot(const nsk_cg::Image& image);
-
-private:
-    SnapshotChecker m_checker{ "D:\\temp\\references",  "D:\\temp\\output" };
-    std::string m_testSuiteName;
-    std::string m_testName;
-    int m_snapshotCounter = 0;
-};
-
-void takeSnapshot(TestDriver& checker, const nsk_cg::Texture& colorBuffer)
+testing_tool::Image getImage(const nsk_cg::Texture& colorBuffer)
 {
     glFinish();
-    auto textureData = colorBuffer.GetData();
-    const nsk_cg::Image image(textureData, colorBuffer.GetSize(), nsk_cg::textureFormatSize(colorBuffer.GetType()));
-    checker.TakeSnapshot(image);
+    const auto textureData = colorBuffer.GetData();
+    auto screenSize = colorBuffer.GetSize();
+    return testing_tool::Image{ textureData, {screenSize.GetWidth(), screenSize.GetHeight()}, nsk_cg::textureFormatSize(colorBuffer.GetType()) };
 }
 
 // Demonstrate some basic assertions.
@@ -50,7 +34,7 @@ TEST(VisualTest, CreatingWindow) {
     int windowWidth = 800;
     int windowHeight = 600;
     const auto& testInfo = getCurrentTestInfo();
-    TestDriver checker(testInfo.test_suite_name(), testInfo.name());
+    testing_tool::TestDriver checker{"D:\\temp\\references", "D:\\temp\\output", testInfo.test_suite_name(), testInfo.name() };
     const auto window = nsk_cg::makeMinimalWindow({ windowWidth, windowHeight }, "TestWindow");
     EXPECT_TRUE(window != nullptr);
     glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
@@ -59,16 +43,10 @@ TEST(VisualTest, CreatingWindow) {
     nsk_cg::Framebuffer framebuffer;
     framebuffer.Attach(colorTexture, depthTexture);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    takeSnapshot(checker, colorTexture);
+    EXPECT_EQ(checker.CheckSnapshot(getImage(colorTexture)), testing_tool::SnapshotCheckResult::Ok) << "Run command";
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    takeSnapshot(checker, colorTexture);
+    EXPECT_EQ(checker.CheckSnapshot(getImage(colorTexture)), testing_tool::SnapshotCheckResult::Ok);
 
     glfwTerminate();
-}
-
-TEST(ImageTest, ReadWorks)
-{
-	//nsk_cg::readImage("D:\\")
-    ASSERT_TRUE(true);
 }

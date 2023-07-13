@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include "Image.h"
 #include "MovableHandle.h"
 #include "ScreenSize.h"
 #include "glad/glad.h"

@@ -45,8 +45,6 @@ utils
 "glfw_utils.h"
 "glfw_utils.cpp"
 "ScreenSize.h"
-"Image.h"
-"Image.cpp"
 )
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)

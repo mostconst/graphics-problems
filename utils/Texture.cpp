@@ -57,7 +57,7 @@ std::vector<unsigned char> Texture::GetData() const
 {
     glBindTexture(GL_TEXTURE_2D, GetRaw());
     const int nComponents = textureFormatSize(m_type);
-    std::vector<unsigned char> buffer(static_cast<size_t>(imagePixelCount(m_size, nComponents)), 0);
+    std::vector<unsigned char> buffer(static_cast<size_t>(m_size.GetWidth() * m_size.GetHeight() * nComponents), 0);
     glGetTexImage(GL_TEXTURE_2D, 0, static_cast<int>(m_type), GL_UNSIGNED_BYTE, buffer.data());
     return buffer;
 }
