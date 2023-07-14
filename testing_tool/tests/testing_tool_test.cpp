@@ -28,62 +28,84 @@ Image makeSingleColorImage(const ImageDimensions& size, const Color& color)
 
     return Image(std::move(buffer), size, components);
 }
-}
 
 namespace fs = std::filesystem;
 
-class ImageRWTest : public ::testing::Test
+class ImageRWTest : public testing::Test
 {
 protected:
     void SetUp() override
     {
-        fs::create_directories(m_testPath);
+        create_directories(m_testPath);
     }
 
     void TearDown() override
     {
-        fs::remove_all(m_testPath);
+        remove_all(m_testPath);
     }
     fs::path m_testPath = fs::temp_directory_path() / "1496bec4-14d1-46b5-a70f-cb0f12e31699";
 };
 
-class SnapshotsTest : public ::testing::Test
+class SnapshotsTest : public testing::Test
 {
 protected:
     void SetUp() override
     {
-        fs::create_directories(m_testPath / m_testSuiteName / m_testName);
-        testing_tool::saveImage(snapshot0, testing_tool::getSnapshotPath(m_testPath, {m_testSuiteName, m_testName, 0}));
-        testing_tool::saveImage(snapshot1, testing_tool::getSnapshotPath(m_testPath, { m_testSuiteName, m_testName, 1}));
+        create_directories(m_referencePath / m_testSuiteName / m_testName);
+        saveImage(reference0, getSnapshotPath(m_referencePath, { m_testSuiteName, m_testName, 0 }));
+        saveImage(reference1, getSnapshotPath(m_referencePath, { m_testSuiteName, m_testName, 1 }));
     }
 
     void TearDown() override
     {
-        fs::remove_all(m_testPath);
+        remove_all(m_testRoot);
     }
-    fs::path m_testPath = fs::temp_directory_path() / "176bca54-0aff-4940-a3bd-587184d417b6";
+    fs::path m_testRoot = fs::temp_directory_path() / "176bca54-0aff-4940-a3bd-587184d417b6";
+    fs::path m_referencePath = m_testRoot / "references";
+    fs::path m_outputPath = m_testRoot / "output";
     std::string m_testSuiteName = "Suite";
     std::string m_testName = "Test";
-    testing_tool::Image snapshot0 = testing_tool::makeSingleColorImage({ 32, 32 }, { 255, 0, 0 });
-    testing_tool::Image snapshot1 = testing_tool::makeSingleColorImage({ 32, 32 }, { 0, 255, 0 });
+    Image reference0 = makeSingleColorImage({ 32, 32 }, { 255, 0, 0 });
+    Image reference1 = makeSingleColorImage({ 32, 32 }, { 0, 255, 0 });
 };
 
 // Demonstrate some basic assertions.
 TEST_F(ImageRWTest, WriteAndRead)
 {
-    const auto image = testing_tool::makeSingleColorImage({ 10, 10 }, { 255, 0, 0 });
+    const auto image = makeSingleColorImage({ 10, 10 }, { 255, 0, 0 });
     const auto imagePath = m_testPath / "img.png";
-    testing_tool::saveImage(image, imagePath);
+    saveImage(image, imagePath);
     EXPECT_TRUE(fs::exists(imagePath));
-    const auto savedImage = testing_tool::readImage(imagePath);
+    const auto savedImage = readImage(imagePath);
     EXPECT_TRUE(savedImage);
     EXPECT_TRUE(testing_tool::equalExactly(image, *savedImage));
 }
 
 TEST_F(SnapshotsTest, CheckerWorks)
 {
-    const testing_tool::SnapshotChecker checker{ m_testPath };
-    EXPECT_EQ(checker.CheckSnapshot(snapshot0, { m_testSuiteName, m_testName, 0 }), testing_tool::SnapshotCheckResult::Ok);
-    EXPECT_EQ(checker.CheckSnapshot(snapshot0, { m_testSuiteName, m_testName, 1 }), testing_tool::SnapshotCheckResult::Mismatch);
-    EXPECT_EQ(checker.CheckSnapshot(snapshot0, { m_testSuiteName, m_testName, 3 }), testing_tool::SnapshotCheckResult::NoReference);
+    const SnapshotChecker checker{ m_referencePath };
+    EXPECT_EQ(checker.CheckSnapshot(reference0, { m_testSuiteName, m_testName, 0 }), testing_tool::SnapshotCheckResult::Ok);
+    EXPECT_EQ(checker.CheckSnapshot(reference0, { m_testSuiteName, m_testName, 1 }), testing_tool::SnapshotCheckResult::Mismatch);
+    EXPECT_EQ(checker.CheckSnapshot(reference0, { m_testSuiteName, m_testName, 3 }), testing_tool::SnapshotCheckResult::NoReference);
+}
+
+std::optional<Image> readSnapshot(const std::filesystem::path& root, const ReferenceDetails& referenceDetails)
+{
+    const auto snapshotPath = getSnapshotPath(root, referenceDetails);
+    return readImage(snapshotPath);
+}
+
+TEST_F(SnapshotsTest, DriverWorks)
+{
+    TestDriver driver(m_referencePath, m_outputPath, m_testSuiteName, m_testName);
+    EXPECT_EQ(driver.CheckSnapshot(reference0), testing_tool::SnapshotCheckResult::Ok);
+    EXPECT_EQ(driver.CheckSnapshot(reference0), testing_tool::SnapshotCheckResult::Mismatch);
+    EXPECT_EQ(driver.CheckSnapshot(reference1), testing_tool::SnapshotCheckResult::NoReference);
+    const auto snapshotActual1 = readSnapshot(m_outputPath, { m_testSuiteName, m_testName, 1 });
+    EXPECT_TRUE(snapshotActual1);
+    EXPECT_TRUE(equalExactly(reference0, *snapshotActual1));
+    const auto snapshotActual2 = readSnapshot(m_outputPath, { m_testSuiteName, m_testName, 2 });
+    EXPECT_TRUE(snapshotActual2);
+    EXPECT_TRUE(equalExactly(reference1, *snapshotActual2));
+}
 }

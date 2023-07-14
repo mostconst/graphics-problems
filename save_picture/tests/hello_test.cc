@@ -34,7 +34,7 @@ TEST(VisualTest, CreatingWindow) {
     int windowWidth = 800;
     int windowHeight = 600;
     const auto& testInfo = getCurrentTestInfo();
-    testing_tool::TestDriver checker{"D:\\temp\\references", "D:\\temp\\output", testInfo.test_suite_name(), testInfo.name() };
+    testing_tool::TestDriver driver{"D:\\temp\\references", "D:\\temp\\output", testInfo.test_suite_name(), testInfo.name() };
     const auto window = nsk_cg::makeMinimalWindow({ windowWidth, windowHeight }, "TestWindow");
     EXPECT_TRUE(window != nullptr);
     glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
@@ -43,10 +43,10 @@ TEST(VisualTest, CreatingWindow) {
     nsk_cg::Framebuffer framebuffer;
     framebuffer.Attach(colorTexture, depthTexture);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    EXPECT_EQ(checker.CheckSnapshot(getImage(colorTexture)), testing_tool::SnapshotCheckResult::Ok) << "Run command";
+    EXPECT_EQ(driver.CheckSnapshot(getImage(colorTexture)), testing_tool::SnapshotCheckResult::Ok) << "Run command";
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    EXPECT_EQ(checker.CheckSnapshot(getImage(colorTexture)), testing_tool::SnapshotCheckResult::Ok);
+    EXPECT_EQ(driver.CheckSnapshot(getImage(colorTexture)), testing_tool::SnapshotCheckResult::Ok);
 
     glfwTerminate();
 }
