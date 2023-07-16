@@ -1,10 +1,10 @@
 add_executable(
   hello_test
   hello_test.cc
-  ${VENDORS_SOURCES}
 )
 target_link_libraries(
   hello_test
+  save_picture_core
   glfw
   testing_tool
   ${GLFW_LIBRARIES}

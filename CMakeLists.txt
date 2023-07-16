@@ -20,14 +20,11 @@ else()
     endif()
 endif()
 
-include_directories(SYSTEM Glitter/Headers/
-                    external/assimp/include/
-                    external/glad/include/
-                    external/glfw/include/
-                    external/glm/
-                    external/stb/
-                    external/learnopengl/
-					utils)
+set(GRAPHICS_PROBLEMS_GLM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/glm)
+set(GRAPHICS_PROBLEMS_STB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/stb)
+
+add_library(glad external/glad/src/glad.c)
+target_include_directories(glad PUBLIC external/glad/include/)
 
 enable_testing()
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)

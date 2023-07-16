@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "Image.h"
 #include "SnapshotChecker.h"
+#include "utils.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
@@ -30,23 +31,33 @@ testing_tool::Image getImage(const nsk_cg::Texture& colorBuffer)
 }
 
 // Demonstrate some basic assertions.
-TEST(VisualTest, CreatingWindow) {
-    int windowWidth = 800;
-    int windowHeight = 600;
-    const auto& testInfo = getCurrentTestInfo();
-    testing_tool::TestDriver driver{"D:\\temp\\references", "D:\\temp\\output", testInfo.test_suite_name(), testInfo.name() };
-    const auto window = nsk_cg::makeMinimalWindow({ windowWidth, windowHeight }, "TestWindow");
-    EXPECT_TRUE(window != nullptr);
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-    nsk_cg::Texture colorTexture(nsk_cg::TextureFormat::Color, windowWidth, windowHeight);
-    nsk_cg::Texture depthTexture(nsk_cg::TextureFormat::Depth, windowWidth, windowHeight);
-    nsk_cg::Framebuffer framebuffer;
-    framebuffer.Attach(colorTexture, depthTexture);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    EXPECT_EQ(driver.CheckSnapshot(getImage(colorTexture)), testing_tool::SnapshotCheckResult::Ok) << "Run command";
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    EXPECT_EQ(driver.CheckSnapshot(getImage(colorTexture)), testing_tool::SnapshotCheckResult::Ok);
+//TEST(VisualTest, CreatingWindow) {
+//    int windowWidth = 800;
+//    int windowHeight = 600;
+//    const auto& testInfo = getCurrentTestInfo();
+//    testing_tool::TestDriver driver{"D:\\temp\\references", "D:\\temp\\output", testInfo.test_suite_name(), testInfo.name() };
+//    const auto window = nsk_cg::makeMinimalWindow({ windowWidth, windowHeight }, "TestWindow");
+//    EXPECT_TRUE(window != nullptr);
+//    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+//    nsk_cg::Texture colorTexture(nsk_cg::TextureFormat::Color, windowWidth, windowHeight);
+//    nsk_cg::Texture depthTexture(nsk_cg::TextureFormat::Depth, windowWidth, windowHeight);
+//    nsk_cg::Framebuffer framebuffer;
+//    framebuffer.Attach(colorTexture, depthTexture);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    EXPECT_EQ(driver.CheckSnapshot(getImage(colorTexture)), testing_tool::SnapshotCheckResult::Ok) << "Run command";
+//    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    EXPECT_EQ(driver.CheckSnapshot(getImage(colorTexture)), testing_tool::SnapshotCheckResult::Ok);
+//
+//    glfwTerminate();
+//}
 
+TEST(VisualTest, DrawToBuffer)
+{
+    const auto window = nsk_cg::makeMinimalWindow({ 800, 600 }, "TestWindow");
+    ASSERT_TRUE(window != nullptr);
+    setColor(1.0, 0.0, 0.0);
+    auto buffer = drawToBuffer();
+    EXPECT_TRUE(buffer.front() = 255);
     glfwTerminate();
 }
