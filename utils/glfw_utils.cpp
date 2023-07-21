@@ -74,34 +74,4 @@ GLFWwindow* makeWindow(nsk_cg::UserContext& userContext, const std::string_view&
 
     return window;
 }
-
-
-GLFWwindow* makeMinimalWindow(const ScreenSize& userContext, const std::string_view& title)
-{
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifndef NDEBUG
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-#endif
-
-    GLFWwindow* const window = glfwCreateWindow(userContext.GetWidth(), userContext.GetHeight(), title.data(),
-        nullptr, nullptr);
-    if (window == nullptr)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return nullptr;
-    }
-    glfwMakeContextCurrent(window);
-
-    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return nullptr;
-    }
-
-    return window;
-}
 }

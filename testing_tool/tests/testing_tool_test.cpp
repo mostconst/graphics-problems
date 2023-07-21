@@ -98,9 +98,9 @@ std::optional<Image> readSnapshot(const std::filesystem::path& root, const Refer
 TEST_F(SnapshotsTest, DriverWorks)
 {
     TestDriver driver(m_referencePath, m_outputPath, m_testSuiteName, m_testName);
-    EXPECT_EQ(driver.CheckSnapshot(reference0), testing_tool::SnapshotCheckResult::Ok);
-    EXPECT_EQ(driver.CheckSnapshot(reference0), testing_tool::SnapshotCheckResult::Mismatch);
-    EXPECT_EQ(driver.CheckSnapshot(reference1), testing_tool::SnapshotCheckResult::NoReference);
+    EXPECT_EQ(driver.CheckSnapshot(reference0, 0), testing_tool::SnapshotCheckResult::Ok);
+    EXPECT_EQ(driver.CheckSnapshot(reference0, 1), testing_tool::SnapshotCheckResult::Mismatch);
+    EXPECT_EQ(driver.CheckSnapshot(reference1, 2), testing_tool::SnapshotCheckResult::NoReference);
     const auto snapshotActual1 = readSnapshot(m_outputPath, { m_testSuiteName, m_testName, 1 });
     EXPECT_TRUE(snapshotActual1);
     EXPECT_TRUE(equalExactly(reference0, *snapshotActual1));

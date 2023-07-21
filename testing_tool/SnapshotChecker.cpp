@@ -1,4 +1,6 @@
 ﻿#include "SnapshotChecker.h"
+
+#include <cassert>
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -7,10 +9,10 @@ namespace fs = std::filesystem;
 
 namespace testing_tool
 {
-ReferenceDetails::ReferenceDetails(const std::string& testSuiteName, const std::string& testName,
-    const int snapshotIndex) : m_testSuiteName(testSuiteName),
-    m_testName(testName),
-    m_snapshotIndex(snapshotIndex)
+ReferenceDetails::ReferenceDetails(std::string testSuiteName, std::string testName, const int snapshotIndex)
+    : m_testSuiteName{std::move(testSuiteName)},
+    m_testName{std::move(testName)},
+    m_snapshotIndex{ snapshotIndex }
 {
 }
 
@@ -33,8 +35,8 @@ int ReferenceDetails::GetSnapshotIndex() const
 }
 
 
-SnapshotChecker::SnapshotChecker(const std::filesystem::path& referencesPath)
-    : m_referencesPath(referencesPath)
+SnapshotChecker::SnapshotChecker(std::filesystem::path referencesPath)
+    : m_referencesPath(std::move(referencesPath))
 {
 }
 
@@ -54,27 +56,67 @@ std::optional<Image> SnapshotChecker::GetReferenceImage(const ReferenceDetails& 
     return readImage(getSnapshotPath(m_referencesPath, referenceDetails));
 }
 
-
-TestDriver::TestDriver(const std::filesystem::path& referencePath, const std::filesystem::path& outputPath, const std::string& testSuiteName, const std::string& testName)
-    : m_checker{ referencePath },
-    m_testSuiteName{ testSuiteName },
-    m_testName{testName},
-m_outputPath{outputPath}
+TestDriver::TestDriver(const std::filesystem::path& sourceDirectory, const std::filesystem::path& binaryDirectory,
+                       std::string testSuiteName, std::string testName)
+    : m_checker{sourceDirectory},
+    m_testSuiteName{std::move(testSuiteName)},
+    m_testName{std::move(testName)},
+    m_outputPath{binaryDirectory}
 {
+    assert(sourceDirectory != binaryDirectory);
 }
 
 
-SnapshotCheckResult TestDriver::CheckSnapshot(const Image& image)
+SnapshotCheckResult TestDriver::CheckSnapshot(const Image& image, const int snapshotIndex) const
 {
-    const auto referenceDetails = ReferenceDetails{ m_testSuiteName, m_testName, m_snapshotCounter++ };
+    const auto referenceDetails = ReferenceDetails{ m_testSuiteName, m_testName, snapshotIndex };
     const auto result = m_checker.CheckSnapshot(image, referenceDetails);
     if (result != SnapshotCheckResult::Ok)
     {
         const auto snapshotPath = getSnapshotPath(m_outputPath, referenceDetails);
-        std::filesystem::create_directories(snapshotPath.parent_path());
+        fs::create_directories(snapshotPath.parent_path());
         saveImage(image, snapshotPath);
     }
 
     return result;
+}
+
+std::wstring resultLogDescription(const SnapshotCheckResult result)
+{
+    switch (result)
+    {
+    case testing_tool::SnapshotCheckResult::Ok:
+        return L"OK";
+    case testing_tool::SnapshotCheckResult::Mismatch:
+        return L"Snapshot doesn't match reference";
+    case testing_tool::SnapshotCheckResult::NoReference:
+        return L"No reference image";
+    }
+
+    assert(false);
+    return L"Unknown test result";
+}
+
+std::wstring toReadableString(fs::path path)
+{
+    return path.make_preferred().native();
+}
+
+std::wstring TestDriver::GetResultLogString(const SnapshotCheckResult result, const int snapshotIndex) const
+{
+    return resultLogDescription(result) + L'\n' +
+        L"Reference: " + toReadableString(GetReferencePath(snapshotIndex)) + L'\n' + 
+        L"Snapshot: " + toReadableString(GetSnapshotPath(snapshotIndex));
+}
+
+std::filesystem::path TestDriver::GetReferencePath(const int snapshotIndex) const
+{
+    return getSnapshotPath(m_checker.GetReferencesPath(), { m_testSuiteName, m_testName, snapshotIndex });
+}
+
+
+std::filesystem::path TestDriver::GetSnapshotPath(int snapshotIndex) const
+{
+    return getSnapshotPath(m_outputPath, { m_testSuiteName, m_testName, snapshotIndex });
 }
 }
