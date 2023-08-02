@@ -26,11 +26,18 @@ private:
     int m_components;
 };
 
+struct Color
+{
+    float r;
+    float g;
+    float b;
+};
+
 struct GLFWwindow;
 class MalevichCore
 {
 public:
-    MalevichCore(int windowWidth, int windowHeight);
+    MalevichCore(int windowWidth);
     ~MalevichCore();
     MalevichCore(const MalevichCore& other) = delete;
     MalevichCore(MalevichCore&& other) noexcept = delete;
@@ -38,11 +45,13 @@ public:
     MalevichCore& operator=(MalevichCore&& other) noexcept = delete;
 
     GLFWwindow* GetWindow() const { return m_window; }
-    void SetColor(float r, float g, float b);
+    void SetBackground(const Color& color);
+    void SetSquareColor(const Color& color);
     void Draw();
     SimpleImage DrawToBuffer();
 private:
     GLFWwindow* m_window;
-    int windowWidth;
-    int windowHeight;
+    int m_size;
+    Color m_background{0.9f, 0.9f, 0.9f};
+    Color m_squareColor{0.0f, 0.0f, 0.0f};
 };

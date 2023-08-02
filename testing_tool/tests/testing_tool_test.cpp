@@ -54,6 +54,9 @@ protected:
         create_directories(m_referencePath / m_testSuiteName / m_testName);
         saveImage(reference0, getSnapshotPath(m_referencePath, { m_testSuiteName, m_testName, 0 }));
         saveImage(reference1, getSnapshotPath(m_referencePath, { m_testSuiteName, m_testName, 1 }));
+
+        create_directories(m_outputPath / m_testSuiteName / m_testName);
+        saveImage(reference0, getSnapshotPath(m_outputPath, { m_testSuiteName, m_testName, 0 }));
     }
 
     void TearDown() override
@@ -93,6 +96,14 @@ std::optional<Image> readSnapshot(const std::filesystem::path& root, const Refer
 {
     const auto snapshotPath = getSnapshotPath(root, referenceDetails);
     return readImage(snapshotPath);
+}
+
+TEST_F(SnapshotsTest, DriverCleansUpPreviousOutput)
+{
+    const auto prevResults = getTestPath(m_outputPath, m_testSuiteName, m_testName);
+    ASSERT_TRUE(fs::exists(prevResults));
+    TestDriver driver(m_referencePath, m_outputPath, m_testSuiteName, m_testName);
+    EXPECT_FALSE(fs::exists(prevResults));
 }
 
 TEST_F(SnapshotsTest, DriverWorks)

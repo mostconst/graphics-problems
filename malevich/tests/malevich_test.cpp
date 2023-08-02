@@ -40,14 +40,22 @@ testing::AssertionResult checkSnapshot(const testing_tool::TestDriver& driver, c
 }
 
 // Demonstrate some basic assertions.
-TEST(VisualTest, GreenThenRed) {
+TEST(MalevichTest, ClassicSquare) {
     const auto& testInfo = getCurrentTestInfo();
     testing_tool::TestDriver driver{references_path, output_path, testInfo.test_suite_name(), testInfo.name() };
     constexpr int windowWidth = 800;
-    constexpr int windowHeight = 600;
-    MalevichCore app(windowWidth, windowHeight);
-    app.SetColor(0.0f, 1.0f, 0.0f);
+    MalevichCore app(windowWidth);
     EXPECT_TRUE(checkSnapshot(driver, getImage(app.DrawToBuffer()), 0));
-    app.SetColor(1.0f, 0.0f, 0.0f);
+}
+
+// Demonstrate some basic assertions.
+TEST(MalevichTest, DifferentBackgrounds) {
+    const auto& testInfo = getCurrentTestInfo();
+    testing_tool::TestDriver driver{ references_path, output_path, testInfo.test_suite_name(), testInfo.name() };
+    constexpr int windowWidth = 800;
+    MalevichCore app(windowWidth);
+    app.SetBackground(Color{ 1.0f, 0.0f, 0.0f });
+    EXPECT_TRUE(checkSnapshot(driver, getImage(app.DrawToBuffer()), 0));
+    app.SetBackground(Color{ 0.0f, 1.0f, 0.0f });
     EXPECT_TRUE(checkSnapshot(driver, getImage(app.DrawToBuffer()), 1));
 }

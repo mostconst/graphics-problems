@@ -41,10 +41,8 @@ private:
     std::filesystem::path m_referencesPath;
 };
 
-inline std::filesystem::path getSnapshotPath(const std::filesystem::path& rootPath, const ReferenceDetails& referenceDetails)
-{
-    return rootPath / referenceDetails.GetTestSuiteName() / referenceDetails.GetTestName() / (std::to_string(referenceDetails.GetSnapshotIndex()) + ".png");
-}
+std::filesystem::path getSnapshotPath(const std::filesystem::path& rootPath, const ReferenceDetails& referenceDetails);
+std::filesystem::path getTestPath(const std::filesystem::path& rootPath, const std::string& suiteName, const std::string& testName);
 
 class TestDriver
 {

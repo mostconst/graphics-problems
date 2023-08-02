@@ -56,6 +56,20 @@ std::optional<Image> SnapshotChecker::GetReferenceImage(const ReferenceDetails& 
     return readImage(getSnapshotPath(m_referencesPath, referenceDetails));
 }
 
+
+std::filesystem::path getSnapshotPath(const std::filesystem::path& rootPath, const ReferenceDetails& referenceDetails)
+{
+    return rootPath / referenceDetails.GetTestSuiteName() / referenceDetails.GetTestName() / (std::to_string(referenceDetails.GetSnapshotIndex()) + ".png");
+}
+
+
+std::filesystem::path getTestPath(const std::filesystem::path& rootPath, const std::string& suiteName,
+    const std::string& testName)
+{
+    return rootPath / suiteName / testName;
+}
+
+
 TestDriver::TestDriver(const std::filesystem::path& sourceDirectory, const std::filesystem::path& binaryDirectory,
                        std::string testSuiteName, std::string testName)
     : m_checker{sourceDirectory},
@@ -64,6 +78,7 @@ TestDriver::TestDriver(const std::filesystem::path& sourceDirectory, const std::
     m_outputPath{binaryDirectory}
 {
     assert(sourceDirectory != binaryDirectory);
+    fs::remove_all(getTestPath(m_outputPath, m_testSuiteName, m_testName));
 }
 
 

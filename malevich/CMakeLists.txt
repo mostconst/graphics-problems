@@ -17,7 +17,7 @@ add_executable(malevich
     Sources/main.cpp
     ${PROJECT_CONFIGS}
 )
-target_link_libraries(malevich glfw utils save_picture_core)
+target_link_libraries(malevich glfw save_picture_core)
 set_target_properties(malevich PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/malevich)
 
