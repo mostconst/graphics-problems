@@ -49,6 +49,10 @@ utils
  "draw_helpers.cpp"
  )
 
+target_link_libraries(utils PUBLIC glfw)
+target_link_libraries(utils PUBLIC glad)
+target_include_directories(utils PUBLIC ${GRAPHICS_PROBLEMS_GLM_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
 	add_executable(
 	  camera_test

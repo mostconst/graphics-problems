@@ -68,10 +68,10 @@ void drawLayers(const ShaderProgram& screenQuadShader, const VertexArray& screen
 
 DepthPeelingResources::DepthPeelingResources(const ScreenSize& screenSize, const int nLayers)
     : m_colorTextures(nsk_cg::makeColorTextures(
-          nLayers, screenSize.m_width, screenSize.m_height)),
+          nLayers, screenSize.GetWidth(), screenSize.GetHeight())),
       m_depthTextures{
-          nsk_cg::makeTexture(TextureFormat::Depth, screenSize.m_width, screenSize.m_height),
-          nsk_cg::makeTexture(TextureFormat::Depth, screenSize.m_width, screenSize.m_height)
+          nsk_cg::makeTexture(TextureFormat::Depth, screenSize.GetWidth(), screenSize.GetHeight()),
+          nsk_cg::makeTexture(TextureFormat::Depth, screenSize.GetWidth(), screenSize.GetHeight())
       }
 {
 }

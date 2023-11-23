@@ -20,27 +20,24 @@ else()
     endif()
 endif()
 
-include_directories(SYSTEM Glitter/Headers/
-                    external/assimp/include/
-                    external/glad/include/
-                    external/glfw/include/
-                    external/glm/
-                    external/stb/
-                    external/learnopengl/
-					utils)
+set(GRAPHICS_PROBLEMS_GLM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/glm)
+set(GRAPHICS_PROBLEMS_STB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/stb)
 
+add_library(glad external/glad/src/glad.c)
+target_include_directories(glad PUBLIC external/glad/include/)
+
+enable_testing()
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
     add_subdirectory(external/googletest)
 	# For Windows: Prevent overriding the parent project's compiler/linker settings
 	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 endif()
-
-enable_testing()
-
 add_subdirectory(utils)
+add_subdirectory(testing_tool)
 add_subdirectory(problem1)
 add_subdirectory(problem2)
 add_subdirectory(problem5)
 add_subdirectory(transparency)
 add_subdirectory(antialiasing)
+add_subdirectory(malevich)
 add_subdirectory(smaa)

@@ -1,5 +1,7 @@
 #include "Texture.h"
 
+#include <cassert>
+
 #include "ScreenSize.h"
 #include "glad/glad.h"
 
@@ -12,9 +14,24 @@ unsigned int createTexture()
     return res;
 }
 
+int textureFormatSize(const TextureFormat format)
+{
+	switch (format)
+	{
+		case TextureFormat::Color:
+            return 4;
+		case TextureFormat::Depth:
+	        return 1;
+	}
+    assert(false);
+
+    return 0;
+}
+
 Texture::Texture(const TextureFormat& type, const int width, const int height)
     : handle(createTexture()),
-      m_type(type)
+      m_type(type),
+      m_size{width, height}
 {
     glBindTexture(GL_TEXTURE_2D, GetRaw());
     glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(type), width, height, 0, static_cast<int>(type), GL_UNSIGNED_BYTE, nullptr);
@@ -28,9 +45,20 @@ Texture::~Texture()
     glDeleteTextures(1, &handle.GetRaw());
 }
 
-void Texture::SetSize(const ScreenSize& size) const
+void Texture::SetSize(const ScreenSize& size)
+{
+    m_size = size;
+    glBindTexture(GL_TEXTURE_2D, GetRaw());
+    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(m_type), size.GetWidth(), size.GetHeight(), 0, static_cast<int>(m_type), GL_UNSIGNED_BYTE, nullptr);
+}
+
+
+std::vector<unsigned char> Texture::GetData() const
 {
     glBindTexture(GL_TEXTURE_2D, GetRaw());
-    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(m_type), size.m_width, size.m_height, 0, static_cast<int>(m_type), GL_UNSIGNED_BYTE, nullptr);
+    const int nComponents = textureFormatSize(m_type);
+    std::vector<unsigned char> buffer(static_cast<size_t>(m_size.GetWidth() * m_size.GetHeight() * nComponents), 0);
+    glGetTexImage(GL_TEXTURE_2D, 0, static_cast<int>(m_type), GL_UNSIGNED_BYTE, buffer.data());
+    return buffer;
 }
 }

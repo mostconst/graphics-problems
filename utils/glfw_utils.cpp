@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "ScreenSize.h"
 #include "UserContext.h"
 
 namespace nsk_cg

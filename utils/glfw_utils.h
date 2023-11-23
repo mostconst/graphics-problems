@@ -5,6 +5,7 @@ struct GLFWwindow;
 
 namespace nsk_cg
 {
+class ScreenSize;
 class UserContext;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);

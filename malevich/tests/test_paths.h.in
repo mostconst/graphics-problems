@@ -1,0 +1,6 @@
+#pragma once
+
+#include <string>
+
+inline std::string references_path = R"(${CMAKE_CURRENT_SOURCE_DIR}/references)";
+inline std::string output_path = R"(${CMAKE_CURRENT_BINARY_DIR}/test_output)";

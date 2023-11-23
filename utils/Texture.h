@@ -1,5 +1,9 @@
 #pragma once
+
+#include <vector>
+
 #include "MovableHandle.h"
+#include "ScreenSize.h"
 #include "glad/glad.h"
 
 namespace nsk_cg
@@ -9,7 +13,7 @@ enum class TextureFormat {
     Depth = GL_DEPTH_COMPONENT
 };
 
-struct ScreenSize;
+int textureFormatSize(TextureFormat format);
 
 class Texture final
 {
@@ -22,10 +26,16 @@ public:
     Texture& operator=(Texture&& other) noexcept = default;
 
     unsigned GetRaw() const { return handle.GetRaw(); }
-    void SetSize(const ScreenSize& size) const;
+    void SetSize(const ScreenSize& size);
+    const ScreenSize& GetSize() const { return m_size; }
+
+    TextureFormat GetType() const { return m_type; }
+
+    std::vector<unsigned char> GetData() const;
 
 private:
     MovableHandle handle;
     const TextureFormat m_type;
+    ScreenSize m_size;
 };
 }

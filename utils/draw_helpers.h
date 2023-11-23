@@ -12,7 +12,7 @@ class VertexArray;
 class Framebuffer;
 class ExtendedDrawData;
 class ShaderProgram;
-struct ScreenSize;
+class ScreenSize;
 
 void drawObject(const ShaderProgram& ourShader, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix,
     const std::vector<ExtendedDrawData>::value_type& drawObject);
