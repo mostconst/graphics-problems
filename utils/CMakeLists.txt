@@ -45,7 +45,9 @@ utils
  "glfw_utils.h"
  "glfw_utils.cpp"
  "ScreenSize.h"
-)
+ "draw_helpers.h"
+ "draw_helpers.cpp"
+ )
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
 	add_executable(
