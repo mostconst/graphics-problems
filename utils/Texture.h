@@ -18,6 +18,7 @@ int textureFormatSize(TextureFormat format);
 class Texture final
 {
 public:
+    Texture(GLint internalFormat, GLenum format, int width, int height, const void* data);
     Texture(const TextureFormat& type, int width, int height);
     ~Texture();
     Texture(const Texture& other) = delete;
@@ -28,14 +29,14 @@ public:
     unsigned GetRaw() const { return handle.GetRaw(); }
     void SetSize(const ScreenSize& size);
     const ScreenSize& GetSize() const { return m_size; }
-
-    TextureFormat GetType() const { return m_type; }
+    void SetWrap(GLint param);
 
     std::vector<unsigned char> GetData() const;
 
 private:
     MovableHandle handle;
-    const TextureFormat m_type;
+    GLint m_internalFormat;
+    GLenum m_format;
     ScreenSize m_size;
 };
 }

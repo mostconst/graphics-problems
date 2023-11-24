@@ -23,13 +23,14 @@
 #include "utils.h"
 #include "glfw_utils.h"
 #include "draw_helpers.h"
-#include "ScreenSize.h"
+#include "SearchTex.h"
+#include "AreaTex.h"
 
 int main()
 {
     constexpr glm::vec3 lookAt(0.0f);
     // HW_ITEM 3
-    nsk_cg::UserContext userContext(lookAt, 10.0f);
+    nsk_cg::UserContext userContext{ lookAt, 10.0f, nsk_cg::ScreenSize{1280, 720} };
 
     GLFWwindow* window = makeWindow(userContext, "Transparency");
     if (window == nullptr)
@@ -44,11 +45,15 @@ int main()
     nsk_cg::ShaderProgram ourShader;
     nsk_cg::ShaderProgram screenQuadShader;
     nsk_cg::ShaderProgram fxaaShader;
+    nsk_cg::ShaderProgram smaaEdgeDetectionShader;
+    nsk_cg::ShaderProgram smaaBlendingShader;
     try
     {
         ourShader = nsk_cg::createShader("GourandBlinn.vert", "Gourand.frag");
         screenQuadShader = nsk_cg::createShader("ScreenQuad.vert", "ScreenQuad.frag");
         fxaaShader = nsk_cg::createShader("ScreenQuad.vert", "fxaa.frag");
+        smaaEdgeDetectionShader = nsk_cg::createShader("SMAAEdgeDetection.vert", "SMAALumaEdgeDetection.frag");
+        smaaBlendingShader = nsk_cg::createShader("SMAABlendingWeightCalculation.vert", "SMAABlendingWeightCalculation.frag");
     }
     catch (std::ifstream::failure& e)
     {
@@ -60,6 +65,11 @@ int main()
         std::cout << e.what() << std::endl;
         return EXIT_FAILURE;
     }
+
+    smaaBlendingShader.Use();
+    smaaBlendingShader.SetInt("edgesTex", 0);
+    smaaBlendingShader.SetInt("areaTex", 1);
+    smaaBlendingShader.SetInt("searchTex", 2);
 
     std::vector<nsk_cg::ArrayBuffer> arrayBuffers;
     std::vector<nsk_cg::ElementBuffer> elementBuffers;
@@ -83,8 +93,12 @@ int main()
     nsk_cg::Framebuffer framebuffer;
     nsk_cg::Texture colorTexture{nsk_cg::TextureFormat::Color, userContext.GetScreenWidth(), userContext.GetScreenHeight() };
     nsk_cg::Texture depthTexture{nsk_cg::TextureFormat::Depth, userContext.GetScreenWidth(), userContext.GetScreenHeight() };
-    nsk_cg::Texture edgeTexture{ nsk_cg::TextureFormat::Color, userContext.GetScreenWidth(), userContext.GetScreenHeight() };
+    nsk_cg::Texture edgesTexture{ nsk_cg::TextureFormat::Color, userContext.GetScreenWidth(), userContext.GetScreenHeight() };
     nsk_cg::Texture blendTexture{ nsk_cg::TextureFormat::Color, userContext.GetScreenWidth(), userContext.GetScreenHeight() };
+    nsk_cg::Texture searchTexture{ GL_R8UI, GL_RED_INTEGER, SEARCHTEX_WIDTH, SEARCHTEX_HEIGHT, searchTexBytes };
+    searchTexture.SetWrap(GL_CLAMP);
+    nsk_cg::Texture areaTexture{ GL_RG8UI, GL_RG_INTEGER, AREATEX_WIDTH, AREATEX_HEIGHT, areaTexBytes };
+    areaTexture.SetWrap(GL_CLAMP);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -113,13 +127,24 @@ int main()
 
         glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
 
-        framebuffer.Attach(edgeTexture, depthTexture);
+        framebuffer.Attach(edgesTexture, depthTexture);
         glClear(GL_COLOR_BUFFER_BIT);
+        drawQuad(smaaEdgeDetectionShader, screenQuadVao, colorTexture);
+
         framebuffer.Attach(blendTexture, depthTexture);
         glClear(GL_COLOR_BUFFER_BIT);
+        smaaBlendingShader.Use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, edgesTexture.GetRaw());
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, areaTexture.GetRaw());
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, searchTexture.GetRaw());
+        screenQuadVao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        drawQuad(fxaaShader, screenQuadVao, colorTexture);
+        glClear(GL_COLOR_BUFFER_BIT);
+        drawQuad(screenQuadShader, screenQuadVao, blendTexture);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

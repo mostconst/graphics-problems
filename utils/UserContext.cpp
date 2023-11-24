@@ -11,6 +11,13 @@ UserContext::UserContext(const glm::vec3& lookAt, const float cameraDistance)
 {
 }
 
+UserContext::UserContext(const glm::vec3& lookAt, const float cameraDistance, const ScreenSize& screenSize)
+    : screenWidth{screenSize.GetWidth()}
+    , screenHeight{screenSize.GetHeight()}
+    , m_camera{cameraDistance, lookAt}
+{
+}
+
 void UserContext::AddScreenSizeListener(IScreenSizeListener* const listener)
 {
     m_screenSizeListeners.push_back(listener);

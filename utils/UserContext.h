@@ -14,6 +14,7 @@ class UserContext final
 {
 public:
     UserContext(const glm::vec3& lookAt, float cameraDistance);
+    UserContext(const glm::vec3& lookAt, float cameraDistance, const ScreenSize& screenSize);
 
     void AddScreenSizeListener(IScreenSizeListener* listener);
 
