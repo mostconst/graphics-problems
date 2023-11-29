@@ -5,10 +5,8 @@
 
 #include "ImageDimensions.h"
 
-namespace testing_tool
+namespace nsk_cg
 {
-class ImageDimensions;
-
 class Image
 {
 public:

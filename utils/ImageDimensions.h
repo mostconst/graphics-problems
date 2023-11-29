@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace testing_tool
+namespace nsk_cg
 {
 class ImageDimensions final
 {

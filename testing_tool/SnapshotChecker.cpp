@@ -40,7 +40,7 @@ SnapshotChecker::SnapshotChecker(std::filesystem::path referencesPath)
 {
 }
 
-SnapshotCheckResult SnapshotChecker::CheckSnapshot(const Image& image, const ReferenceDetails& referenceDetails) const
+SnapshotCheckResult SnapshotChecker::CheckSnapshot(const nsk_cg::Image& image, const ReferenceDetails& referenceDetails) const
 {
     const auto referenceImage = GetReferenceImage(referenceDetails);
     if (referenceImage == std::nullopt)
@@ -51,9 +51,9 @@ SnapshotCheckResult SnapshotChecker::CheckSnapshot(const Image& image, const Ref
     return equalExactly(*referenceImage, image) ? SnapshotCheckResult::Ok : SnapshotCheckResult::Mismatch;
 }
 
-std::optional<Image> SnapshotChecker::GetReferenceImage(const ReferenceDetails& referenceDetails) const
+std::optional<nsk_cg::Image> SnapshotChecker::GetReferenceImage(const ReferenceDetails& referenceDetails) const
 {
-    return readImage(getSnapshotPath(m_referencesPath, referenceDetails));
+    return nsk_cg::readImage(getSnapshotPath(m_referencesPath, referenceDetails));
 }
 
 
@@ -61,7 +61,6 @@ std::filesystem::path getSnapshotPath(const std::filesystem::path& rootPath, con
 {
     return rootPath / referenceDetails.GetTestSuiteName() / referenceDetails.GetTestName() / (std::to_string(referenceDetails.GetSnapshotIndex()) + ".png");
 }
-
 
 std::filesystem::path getTestPath(const std::filesystem::path& rootPath, const std::string& suiteName,
     const std::string& testName)
@@ -82,7 +81,7 @@ TestDriver::TestDriver(const std::filesystem::path& sourceDirectory, const std::
 }
 
 
-SnapshotCheckResult TestDriver::CheckSnapshot(const Image& image, const int snapshotIndex) const
+SnapshotCheckResult TestDriver::CheckSnapshot(const nsk_cg::Image& image, const int snapshotIndex) const
 {
     const auto referenceDetails = ReferenceDetails{ m_testSuiteName, m_testName, snapshotIndex };
     const auto result = m_checker.CheckSnapshot(image, referenceDetails);
@@ -90,7 +89,7 @@ SnapshotCheckResult TestDriver::CheckSnapshot(const Image& image, const int snap
     {
         const auto snapshotPath = getSnapshotPath(m_outputPath, referenceDetails);
         fs::create_directories(snapshotPath.parent_path());
-        saveImage(image, snapshotPath);
+        nsk_cg::saveImage(image, snapshotPath);
     }
 
     return result;

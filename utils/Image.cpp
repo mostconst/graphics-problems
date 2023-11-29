@@ -9,7 +9,7 @@
 #include "stb_image.h"
 
 
-namespace testing_tool
+namespace nsk_cg
 {
 Image::Image(std::vector<unsigned char> buffer, const ImageDimensions& size, const int nComponents)
     : m_buffer(std::move(buffer)),

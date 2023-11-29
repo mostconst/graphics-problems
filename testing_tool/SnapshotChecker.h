@@ -33,8 +33,8 @@ class SnapshotChecker
 {
 public:
     SnapshotChecker(std::filesystem::path referencesPath);
-    SnapshotCheckResult CheckSnapshot(const Image& image, const ReferenceDetails& referenceDetails) const;
-    std::optional<Image> GetReferenceImage(const ReferenceDetails& referenceDetails) const;
+    SnapshotCheckResult CheckSnapshot(const nsk_cg::Image& image, const ReferenceDetails& referenceDetails) const;
+    std::optional<nsk_cg::Image> GetReferenceImage(const ReferenceDetails& referenceDetails) const;
     const std::filesystem::path& GetReferencesPath() const { return m_referencesPath; }
 
 private:
@@ -49,7 +49,7 @@ class TestDriver
 public:
     TestDriver(const std::filesystem::path& sourceDirectory, const std::filesystem::path& binaryDirectory,
                std::string testSuiteName, std::string testName);
-    SnapshotCheckResult CheckSnapshot(const Image& image, int snapshotIndex) const;
+    SnapshotCheckResult CheckSnapshot(const nsk_cg::Image& image, int snapshotIndex) const;
     std::wstring GetResultLogString(SnapshotCheckResult result, int snapshotIndex) const;
     std::filesystem::path GetReferencePath(int snapshotIndex) const;
     std::filesystem::path GetSnapshotPath(int snapshotIndex) const;

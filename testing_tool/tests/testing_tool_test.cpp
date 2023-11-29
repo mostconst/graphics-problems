@@ -11,7 +11,7 @@ struct Color
     unsigned char g;
     unsigned char b;
 };
-Image makeSingleColorImage(const ImageDimensions& size, const Color& color)
+nsk_cg::Image makeSingleColorImage(const nsk_cg::ImageDimensions& size, const Color& color)
 {
     std::vector<unsigned char> buffer;
     constexpr int components = 3;
@@ -26,7 +26,7 @@ Image makeSingleColorImage(const ImageDimensions& size, const Color& color)
         }
     }
 
-    return Image(std::move(buffer), size, components);
+    return nsk_cg::Image(std::move(buffer), size, components);
 }
 
 namespace fs = std::filesystem;
@@ -52,7 +52,7 @@ protected:
     void SetUp() override
     {
         create_directories(m_referencePath / m_testSuiteName / m_testName);
-        saveImage(reference0, getSnapshotPath(m_referencePath, { m_testSuiteName, m_testName, 0 }));
+        nsk_cg::saveImage(reference0, getSnapshotPath(m_referencePath, { m_testSuiteName, m_testName, 0 }));
         saveImage(reference1, getSnapshotPath(m_referencePath, { m_testSuiteName, m_testName, 1 }));
 
         create_directories(m_outputPath / m_testSuiteName / m_testName);
@@ -68,8 +68,8 @@ protected:
     fs::path m_outputPath = m_testRoot / "output";
     std::string m_testSuiteName = "Suite";
     std::string m_testName = "Test";
-    Image reference0 = makeSingleColorImage({ 32, 32 }, { 255, 0, 0 });
-    Image reference1 = makeSingleColorImage({ 32, 32 }, { 0, 255, 0 });
+    nsk_cg::Image reference0 = makeSingleColorImage({ 32, 32 }, { 255, 0, 0 });
+    nsk_cg::Image reference1 = makeSingleColorImage({ 32, 32 }, { 0, 255, 0 });
 };
 
 // Demonstrate some basic assertions.
@@ -79,9 +79,9 @@ TEST_F(ImageRWTest, WriteAndRead)
     const auto imagePath = m_testPath / "img.png";
     saveImage(image, imagePath);
     EXPECT_TRUE(fs::exists(imagePath));
-    const auto savedImage = readImage(imagePath);
+    const auto savedImage = nsk_cg::readImage(imagePath);
     EXPECT_TRUE(savedImage);
-    EXPECT_TRUE(testing_tool::equalExactly(image, *savedImage));
+    EXPECT_TRUE(nsk_cg::equalExactly(image, *savedImage));
 }
 
 TEST_F(SnapshotsTest, CheckerWorks)
@@ -92,10 +92,10 @@ TEST_F(SnapshotsTest, CheckerWorks)
     EXPECT_EQ(checker.CheckSnapshot(reference0, { m_testSuiteName, m_testName, 3 }), testing_tool::SnapshotCheckResult::NoReference);
 }
 
-std::optional<Image> readSnapshot(const std::filesystem::path& root, const ReferenceDetails& referenceDetails)
+std::optional<nsk_cg::Image> readSnapshot(const std::filesystem::path& root, const ReferenceDetails& referenceDetails)
 {
     const auto snapshotPath = getSnapshotPath(root, referenceDetails);
-    return readImage(snapshotPath);
+    return nsk_cg::readImage(snapshotPath);
 }
 
 TEST_F(SnapshotsTest, DriverCleansUpPreviousOutput)

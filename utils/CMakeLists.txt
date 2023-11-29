@@ -47,11 +47,14 @@ utils
  "ScreenSize.h"
  "draw_helpers.h"
  "draw_helpers.cpp"
- )
+ "ImageDimensions.h"
+ "Image.cpp"
+ "Image.h")
 
 target_link_libraries(utils PUBLIC glfw)
 target_link_libraries(utils PUBLIC glad)
 target_include_directories(utils PUBLIC ${GRAPHICS_PROBLEMS_GLM_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(utils PRIVATE ${GRAPHICS_PROBLEMS_STB_INCLUDE_DIR})
 
 if(GRAPHICS_PROBLEMS_BUILD_TESTS)
 	add_executable(

@@ -19,12 +19,12 @@ const testing::TestInfo& getCurrentTestInfo()
     return *testInfo;
 }
 
-testing_tool::Image getImage(const SimpleImage& colorBuffer)
+nsk_cg::Image getImage(const SimpleImage& colorBuffer)
 {
-    return testing_tool::Image{ colorBuffer.GetBuffer(), {colorBuffer.GetWidth(), colorBuffer.GetHeight()}, colorBuffer.GetComponents() };
+    return nsk_cg::Image{ colorBuffer.GetBuffer(), {colorBuffer.GetWidth(), colorBuffer.GetHeight()}, colorBuffer.GetComponents() };
 }
 
-testing::AssertionResult checkSnapshot(const testing_tool::TestDriver& driver, const testing_tool::Image& snapshot, const int snapshotIndex)
+testing::AssertionResult checkSnapshot(const testing_tool::TestDriver& driver, const nsk_cg::Image& snapshot, const int snapshotIndex)
 {
     switch(const auto result = driver.CheckSnapshot(snapshot, snapshotIndex))
     {
