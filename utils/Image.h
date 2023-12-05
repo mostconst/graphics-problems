@@ -28,4 +28,5 @@ int imagePixelCount(const ImageDimensions& size, int nComponents);
 
 void saveImage(const Image& image, const std::filesystem::path& filename);
 std::optional<Image> readImage(const std::filesystem::path& filename);
+void flipImage(unsigned char* buf, size_t width, size_t height, size_t blockSize);
 }

@@ -105,4 +105,17 @@ std::optional<Image> readImage(const std::filesystem::path& filename)
 
     return Image{ data.get(), {width, height}, nrChannels };
 }
+
+void flipImage(unsigned char* buf, const size_t width, const size_t height, const size_t blockSize)
+{
+    for(size_t row = 0; row < height / 2; ++row)
+    {
+        const auto oppositeRow = height - 1 - row;
+        const auto widthInBytes = width * blockSize;
+        const auto rowStartIndex = row * widthInBytes;
+        const auto oppositeRowIndex = oppositeRow * widthInBytes;
+        assert(oppositeRow >= height / 2);
+        std::swap_ranges(buf + rowStartIndex, buf + rowStartIndex + widthInBytes, buf + oppositeRowIndex);
+    }
+}
 }

@@ -25,6 +25,7 @@
 #include "draw_helpers.h"
 #include "SearchTex.h"
 #include "AreaTex.h"
+#include "Image.h"
 
 int main()
 {
@@ -88,18 +89,22 @@ int main()
     };
 
     constexpr glm::vec3 backgroundColor(1.0f);
-    glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, 1.0f);
 
-    nsk_cg::Framebuffer framebuffer;
     nsk_cg::Texture colorTexture{nsk_cg::TextureFormat::Color, userContext.GetScreenWidth(), userContext.GetScreenHeight() };
     nsk_cg::Texture depthTexture{nsk_cg::TextureFormat::Depth, userContext.GetScreenWidth(), userContext.GetScreenHeight() };
     nsk_cg::Texture edgesTexture{ nsk_cg::TextureFormat::Color, userContext.GetScreenWidth(), userContext.GetScreenHeight() };
     nsk_cg::Texture blendTexture{ nsk_cg::TextureFormat::Color, userContext.GetScreenWidth(), userContext.GetScreenHeight() };
-    nsk_cg::Texture searchTexture{ GL_R8UI, GL_RED_INTEGER, SEARCHTEX_WIDTH, SEARCHTEX_HEIGHT, searchTexBytes };
+
+    std::vector<unsigned char> flippedSearchTex(searchTexBytes, searchTexBytes + SEARCHTEX_SIZE);
+    nsk_cg::flipImage(flippedSearchTex.data(), SEARCHTEX_WIDTH, SEARCHTEX_HEIGHT, 1);
+    nsk_cg::Texture searchTexture{ GL_R8, GL_RED, SEARCHTEX_WIDTH, SEARCHTEX_HEIGHT, flippedSearchTex.data() };
     searchTexture.SetWrap(GL_CLAMP);
-    nsk_cg::Texture areaTexture{ GL_RG8UI, GL_RG_INTEGER, AREATEX_WIDTH, AREATEX_HEIGHT, areaTexBytes };
+    std::vector<unsigned char> flippedAreaTex(areaTexBytes, areaTexBytes + AREATEX_SIZE);
+    nsk_cg::flipImage(flippedAreaTex.data(), AREATEX_WIDTH, AREATEX_HEIGHT, 2);
+    nsk_cg::Texture areaTexture{ GL_RG8, GL_RG, AREATEX_WIDTH, AREATEX_HEIGHT, flippedAreaTex.data() };
     areaTexture.SetWrap(GL_CLAMP);
 
+    nsk_cg::Framebuffer framebuffer;
     while (!glfwWindowShouldClose(window))
     {
         nsk_cg::processInput(window);
@@ -112,6 +117,7 @@ int main()
 
         framebuffer.Attach(colorTexture, depthTexture);
         framebuffer.Bind();
+        glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for (const auto& object : sceneObjects.GetOpaqueObjects())
@@ -128,10 +134,12 @@ int main()
         glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
 
         framebuffer.Attach(edgesTexture, depthTexture);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         drawQuad(smaaEdgeDetectionShader, screenQuadVao, colorTexture);
 
         framebuffer.Attach(blendTexture, depthTexture);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         smaaBlendingShader.Use();
         glActiveTexture(GL_TEXTURE0);

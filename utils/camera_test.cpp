@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "Color.h"
+#include "Image.h"
 #include "comparison.h"
 #include "math_util.h"
 #include "IndexedVertices.h"
@@ -120,4 +121,64 @@ TEST(ColorTest, Colors)
     EXPECT_EQ(1.0f, red.GetRed());
     EXPECT_EQ(0.0f, red.GetBlue());
     EXPECT_EQ(0.0f, red.GetGreen());
+}
+
+TEST(FlipTest, FlipRegular)
+{
+    std::vector<unsigned char> image1{
+        1, 2,
+        3, 4
+    };
+    const std::vector<unsigned char> expected1{
+        3, 4,
+        1, 2
+    };
+    nsk_cg::flipImage(image1.data(), 2, 2, 1);
+    ASSERT_EQ(image1, expected1);
+
+    std::vector<unsigned char> image2{
+        1, 2, 3,
+        4, 5, 6,
+        7, 8, 9
+    };
+    const std::vector<unsigned char> expected2{
+        7, 8, 9,
+        4, 5, 6,
+        1, 2, 3,
+    };
+    nsk_cg::flipImage(image2.data(), 3, 3, 1);
+    ASSERT_EQ(image2, expected2);
+
+    std::vector<unsigned char> image3{
+        1, 2, 3,
+    };
+    const std::vector<unsigned char> expected3{
+        1, 2, 3
+    };
+    nsk_cg::flipImage(image3.data(), 3, 1, 1);
+    ASSERT_EQ(image3, expected3);
+
+    std::vector<unsigned char> image4{
+        1,
+        2,
+        3,
+    };
+    const std::vector<unsigned char> expected4{
+        3,
+        2,
+        1,
+    };
+    nsk_cg::flipImage(image4.data(), 1, 3, 1);
+    ASSERT_EQ(image4, expected4);
+
+    std::vector<unsigned char> image5{
+    1, 2, 3, 4,
+    5, 6, 7, 8,
+    };
+    const std::vector<unsigned char> expected5{
+        5, 6, 7, 8,
+        1, 2, 3, 4,
+    };
+    nsk_cg::flipImage(image5.data(), 2, 2, 2);
+    ASSERT_EQ(image5, expected5);
 }
