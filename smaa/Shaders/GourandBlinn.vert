@@ -66,5 +66,5 @@ void main()
 
     vec3 lightSourceColor = colorFromLightSource(viewFragmentPosition, viewFragmentNormal, light);
 
-	vertexColor = vec4(lightSourceColor, material.opacity);
+	vertexColor = vec4(material.ambient, 1.0);
 }

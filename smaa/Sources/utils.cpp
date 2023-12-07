@@ -51,7 +51,7 @@ SceneObjects prepareScene(std::vector<ArrayBuffer>& arrayBuffers, std::vector<El
                               VertexArray>& vertexArrays)
 {
     const Mesh cube = makeCubeForLighting();
-    const Mesh rectangleMesh = makeRectangle(1.0f);
+    const Mesh rectangleMesh = makeRectangle(2.0f);
     vertexArrays.push_back(loadBuffers(cube, arrayBuffers, elementBuffers));
     vertexArrays.push_back(loadBuffers(rectangleMesh, arrayBuffers, elementBuffers));
     const VertexArray& cubeVao = *(vertexArrays.rbegin() + 1);
@@ -67,8 +67,8 @@ SceneObjects prepareScene(std::vector<ArrayBuffer>& arrayBuffers, std::vector<El
     };
 
     std::vector<ExtendedDrawData> opaqueObjects = {
-        ExtendedDrawData(&rectangleVao, makeTransparentMaterial({0.0f, 1.0f, 0.0f, 1.0f}),
-                                         translate(glm::mat4(1.0f), {1.0f, 1.0f, 1.0f}),
+        ExtendedDrawData(&rectangleVao, makeTransparentMaterial({1.0f, 0.0f, 0.0f, 1.0f}),
+                                         glm::mat4(1.0f)/*translate(glm::mat4(1.0f), {1.0f, 1.0f, 1.0f})*/,
                                          rectangleMesh.GetIndices().size())
     };
 
