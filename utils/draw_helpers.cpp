@@ -34,4 +34,13 @@ void drawQuad(const ShaderProgram& screenQuadShader, const VertexArray& screenQu
     glBindTexture(GL_TEXTURE_2D, colorTexture.GetRaw()); // use the color attachment texture as the texture of the quad plane
     screenQuadVao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
+
+void drawQuadBufferless(const ShaderProgram& screenQuadShader, const VertexArray& screenQuadVao,
+    const Texture& colorTexture)
+{
+    screenQuadShader.Use();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, colorTexture.GetRaw()); // use the color attachment texture as the texture of the quad plane
+    screenQuadVao.drawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+}
 }

@@ -47,14 +47,18 @@ int main()
     nsk_cg::ShaderProgram screenQuadShader;
     nsk_cg::ShaderProgram fxaaShader;
     nsk_cg::ShaderProgram smaaEdgeDetectionShader;
+    nsk_cg::ShaderProgram smaaEdgeDetectionShaderInclude;
     nsk_cg::ShaderProgram smaaBlendingShader;
+    nsk_cg::ShaderProgram smaaBlendingShaderInclude;
     try
     {
         ourShader = nsk_cg::createShader("GourandBlinn.vert", "Gourand.frag");
         screenQuadShader = nsk_cg::createShader("ScreenQuad.vert", "ScreenQuad.frag");
         fxaaShader = nsk_cg::createShader("ScreenQuad.vert", "fxaa.frag");
         smaaEdgeDetectionShader = nsk_cg::createShader("SMAAEdgeDetection.vert", "SMAALumaEdgeDetection.frag");
+        smaaEdgeDetectionShaderInclude = nsk_cg::createShader("SMAAEdgeDetectionComplete.vert", "SMAAEdgeDetectionComplete.frag");
         smaaBlendingShader = nsk_cg::createShader("SMAABlendingWeightCalculation.vert", "SMAABlendingWeightCalculation.frag");
+        smaaBlendingShaderInclude = nsk_cg::createShader("SMAABlendingWeightCalculationComplete.vert", "SMAABlendingWeightCalculationComplete.frag");
     }
     catch (std::ifstream::failure& e)
     {
@@ -67,10 +71,10 @@ int main()
         return EXIT_FAILURE;
     }
 
-    smaaBlendingShader.Use();
-    smaaBlendingShader.SetInt("edgesTex", 0);
-    smaaBlendingShader.SetInt("areaTex", 1);
-    smaaBlendingShader.SetInt("searchTex", 2);
+    smaaBlendingShaderInclude.Use();
+    smaaBlendingShaderInclude.SetInt("edgesTex", 0);
+    smaaBlendingShaderInclude.SetInt("areaTex", 1);
+    smaaBlendingShaderInclude.SetInt("searchTex", 2);
 
     std::vector<nsk_cg::ArrayBuffer> arrayBuffers;
     std::vector<nsk_cg::ElementBuffer> elementBuffers;
@@ -108,7 +112,7 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         nsk_cg::processInput(window);
-
+         
         const glm::mat4 viewMatrix = userContext.GetViewMatrix();
         ourShader.Use();
         setLightSourceToShader(light, ourShader, viewMatrix);
@@ -125,30 +129,26 @@ int main()
             const glm::mat4 projectionMatrix = userContext.GetProjection();
             drawObject(ourShader, viewMatrix, projectionMatrix, object);
         }
-        for (const auto& object : sceneObjects.GetTransparentObjects())
-        {
-            const glm::mat4 projectionMatrix = userContext.GetProjection();
-            drawObject(ourShader, viewMatrix, projectionMatrix, object);
-        }
 
         glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
 
         framebuffer.Attach(edgesTexture, depthTexture);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        drawQuad(smaaEdgeDetectionShader, screenQuadVao, colorTexture);
+        drawQuadBufferless(smaaEdgeDetectionShaderInclude, screenQuadVao, colorTexture);
 
         framebuffer.Attach(blendTexture, depthTexture);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        smaaBlendingShader.Use();
+        smaaBlendingShaderInclude.Use();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, edgesTexture.GetRaw());
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, areaTexture.GetRaw());
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, searchTexture.GetRaw());
-        screenQuadVao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        screenQuadVao.drawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+        glActiveTexture(GL_TEXTURE0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT);

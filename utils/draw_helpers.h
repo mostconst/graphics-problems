@@ -18,4 +18,6 @@ void drawObject(const ShaderProgram& ourShader, const glm::mat4& viewMatrix, con
     const std::vector<ExtendedDrawData>::value_type& drawObject);
 void drawQuad(const ShaderProgram& screenQuadShader, const VertexArray& screenQuadVao,
     const Texture& colorTexture);
+void drawQuadBufferless(const ShaderProgram& screenQuadShader, const VertexArray& screenQuadVao,
+    const Texture& colorTexture);
 }

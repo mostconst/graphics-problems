@@ -8,6 +8,7 @@ option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 add_subdirectory(external/glfw)
+add_subdirectory(external/simplecpp)
 
 option(GRAPHICS_PROBLEMS_BUILD_TESTS OFF)
 
